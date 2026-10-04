@@ -1,4 +1,4 @@
-# 🌊 Ocean Code
+# Ocean Code
 
 > An autonomous agentic AI coding companion for your terminal, inspired by Claude Code and OpenCode.
 
