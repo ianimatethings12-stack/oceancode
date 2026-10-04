@@ -35,7 +35,7 @@ export function getCollapsedToolLine(type, details = {}) {
       const addFmt = details.added !== undefined ? chalk.green(`+${details.added}`) : chalk.green('+7');
       const remFmt = details.removed !== undefined ? chalk.red(`-${details.removed}`) : chalk.red('-3');
       const fileName = details.file || 'repair-vm.mts';
-      return `${chalk.bold('✎ Edited file')} ${chalk.white(fileName)} ${addFmt} ${remFmt}`.trim();
+      return `${chalk.bold('* Edited file')} ${chalk.white(fileName)} ${addFmt} ${remFmt}`.trim();
     }
 
     case 'command':
@@ -49,30 +49,30 @@ export function getCollapsedToolLine(type, details = {}) {
 
     case 'read': {
       if (details.count && details.count > 1) {
-        return `${chalk.bold('📄 Read')} ${chalk.white(`${details.count} files`)}`;
+        return `${chalk.bold('* Read')} ${chalk.white(`${details.count} files`)}`;
       }
       const file = details.file || details.name || 'core.ts';
       const range = details.lines ? chalk.dim(` (${details.lines})`) : '';
-      return `${chalk.bold('📄 Read file')} ${chalk.white(file)}${range}`;
+      return `${chalk.bold('* Read file')} ${chalk.white(file)}${range}`;
     }
 
     case 'search': {
       const query = details.query || details.name || 'createAcpDriver';
-      return `${chalk.bold('🔍 Searched function')} ${chalk.white(query)}`;
+      return `${chalk.bold('* Searched function')} ${chalk.white(query)}`;
     }
 
     case 'explore': {
       const count = details.count || 2;
-      return `${chalk.bold('◎ Explored')} ${chalk.white(`${count} searches`)}`;
+      return `${chalk.bold('* Explored')} ${chalk.white(`${count} searches`)}`;
     }
 
     case 'think': {
       const dur = details.duration || '2s';
-      return `${chalk.bold('🧠 Thought for')} ${chalk.white(dur)}`;
+      return `${chalk.bold('* Thought for')} ${chalk.white(dur)}`;
     }
 
     default:
-      return `${chalk.bold('⚙ Tool result')} ${chalk.dim(details.name || '')}`.trim();
+      return `${chalk.bold('* Tool result')} ${chalk.dim(details.name || '')}`.trim();
   }
 }
 
@@ -87,7 +87,7 @@ export function buildExpandedToolBlock(type, details = {}, cols = 90) {
       const fileName = details.file || 'repair-vm.mts';
       const filePath = details.path || details.file || 'D:\\Omnicode\\Agents app\\.omb-scratch\\repair-vm.mts';
 
-      lines.push(`${chalk.bold('✎ Edited file')} ${chalk.white(fileName)} ${addFmt} ${remFmt}`.trim());
+      lines.push(`${chalk.bold('* Edited file')} ${chalk.white(fileName)} ${addFmt} ${remFmt}`.trim());
       lines.push(chalk.dim(filePath));
       lines.push('');
 
@@ -105,7 +105,7 @@ export function buildExpandedToolBlock(type, details = {}, cols = 90) {
           }
         }
       } else {
-        // Exact diff block from screenshot Image 1
+        // Exact diff block from screenshot
         lines.push(formatDiffRow('import { containerComputerAction, SHARED_LOCAL_VM_TARGET } from "./server/container-computer.ts";', 'del', contentWidth));
         lines.push(formatDiffRow('const step = async (a) => {', 'del', contentWidth));
         lines.push(formatDiffRow('import { containerComputerAction, SHARED_LOCAL_VM_TARGET } from "./server/container-computer.ts";', 'add', contentWidth));
@@ -163,7 +163,7 @@ export function buildExpandedToolBlock(type, details = {}, cols = 90) {
     case 'read': {
       const file = details.file || details.name || 'core.ts';
       const range = details.lines ? `(${details.lines})` : '';
-      lines.push(`${chalk.bold('📄 Read file')} ${chalk.white(file)} ${chalk.dim(range)}`);
+      lines.push(`${chalk.bold('* Read file')} ${chalk.white(file)} ${chalk.dim(range)}`);
       lines.push(chalk.dim(`  Path: ${details.path || 'D:\\Omnicode\\Agents app\\core.ts'}`));
       lines.push(chalk.dim(`  Inspecting declarations, imports, and core ACP driver factory...`));
       break;
@@ -171,14 +171,14 @@ export function buildExpandedToolBlock(type, details = {}, cols = 90) {
 
     case 'search': {
       const query = details.query || details.name || 'createAcpDriver';
-      lines.push(`${chalk.bold('🔍 Searched function')} ${chalk.white(query)}`);
+      lines.push(`${chalk.bold('* Searched function')} ${chalk.white(query)}`);
       lines.push(chalk.dim(`  Workspace: D:\\Omnicode\\Agents app`));
       lines.push(chalk.dim(`  Pattern: ${query} in *.ts, *.mts, *.js`));
       break;
     }
 
     default: {
-      lines.push(`${chalk.bold('⚙ Tool result')} ${chalk.dim(details.name || '')}`);
+      lines.push(`${chalk.bold('* Tool result')} ${chalk.dim(details.name || '')}`);
       lines.push(chalk.dim('  Action completed successfully.'));
       break;
     }
@@ -202,7 +202,7 @@ export async function executeToolWithCollapse(tool, bottomBar, delayMs = 900) {
   const collapsedLine = getCollapsedToolLine(tool.type, tool);
   bottomBar.collapseBlock(block, collapsedLine);
 
-  // 4. Render commentary line if provided (e.g. Image 3 / Image 4)
+  // 4. Render commentary line if provided
   if (tool.commentary) {
     bottomBar.writeLine(tool.commentary);
   }

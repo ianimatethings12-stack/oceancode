@@ -27,10 +27,10 @@ export const state = {
   gitBranch: getGitBranch(),
   theme: 'ocean',
   availableModels: [
-    { id: 'ocean-3.5-deep', name: 'Ocean 3.5 Deep (Recommended)', speed: '⚡ Fast', desc: 'SOTA coding & reasoning' },
-    { id: 'claude-3-7-sonnet', name: 'Claude 3.7 Sonnet (Hybrid)', speed: '⚡ Fast', desc: 'Hybrid reasoning agent' },
-    { id: 'ocean-abyss-r1', name: 'Ocean Abyss R1', speed: '🧠 Deep', desc: 'High-depth mathematical coding' },
-    { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', speed: '🚀 Ultra', desc: '1M context window multi-repo' },
+    { id: 'ocean-3.5-deep', name: 'Ocean 3.5 Deep (Recommended)', speed: 'Fast', desc: 'SOTA coding & reasoning' },
+    { id: 'claude-3-7-sonnet', name: 'Claude 3.7 Sonnet (Hybrid)', speed: 'Fast', desc: 'Hybrid reasoning agent' },
+    { id: 'ocean-abyss-r1', name: 'Ocean Abyss R1', speed: 'Deep', desc: 'High-depth mathematical coding' },
+    { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro', speed: 'Ultra', desc: '1M context window multi-repo' },
   ],
 };
 

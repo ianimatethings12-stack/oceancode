@@ -94,7 +94,7 @@ async function handleUserInput(input) {
     // Multi-step tool execution sequence identical to Image 3!
     activeBottomBar.setStatus('Thinking...');
     await new Promise(r => setTimeout(r, 400));
-    activeBottomBar.writeToScroll(`${chalk.bold('🧠 Thought for')} ${chalk.white('2s')}`);
+    activeBottomBar.writeToScroll(`${chalk.bold('* Thought for')} ${chalk.white('2s')}`);
     activeBottomBar.writeToScroll(`Found it — opencodeGo is an ACP driver. Let me read it and the ACP core's capabilities block...`);
 
     // Step 1: Read files
@@ -121,7 +121,7 @@ async function handleUserInput(input) {
     }, activeBottomBar, 700);
 
     // Step 4: Explored searches & read file
-    activeBottomBar.writeToScroll(`${chalk.bold('◎ Explored')} ${chalk.white('2 searches')}`);
+    activeBottomBar.writeToScroll(`${chalk.bold('* Explored')} ${chalk.white('2 searches')}`);
     await executeToolWithCollapse({
       type: 'read',
       file: 'core.ts',
@@ -130,7 +130,7 @@ async function handleUserInput(input) {
     }, activeBottomBar, 600);
 
     // Step 5: Second thought
-    activeBottomBar.writeToScroll(`${chalk.bold('🧠 Thought for')} ${chalk.white('4s')}`);
+    activeBottomBar.writeToScroll(`${chalk.bold('* Thought for')} ${chalk.white('4s')}`);
     activeBottomBar.writeToScroll(`Now let me find the ACP driver's capabilities declaration and server status...`);
 
     await executeToolWithCollapse({
@@ -146,7 +146,7 @@ async function handleUserInput(input) {
     }, activeBottomBar, 700);
 
     // Step 7: Third thought & read
-    activeBottomBar.writeToScroll(`${chalk.bold('🧠 Thought for')} ${chalk.white('13s')}`);
+    activeBottomBar.writeToScroll(`${chalk.bold('* Thought for')} ${chalk.white('13s')}`);
     activeBottomBar.writeToScroll(`The ACP driver does declare computerMcp: true. So the gate isn't closed on the\nrunning server's status.`);
 
     await executeToolWithCollapse({
@@ -160,7 +160,7 @@ async function handleUserInput(input) {
     // Shows the exact Image 1 diff during execution, then collapses!
     activeBottomBar.setStatus('Thinking...');
     await new Promise(r => setTimeout(r, 400));
-    activeBottomBar.writeToScroll(`${chalk.bold('🧠 Thought for')} ${chalk.white('2s')}`);
+    activeBottomBar.writeToScroll(`${chalk.bold('* Thought for')} ${chalk.white('2s')}`);
     activeBottomBar.writeToScroll(`Found it — opencodeGo is an ACP driver. Let me inspect repair-vm.mts and patch the container action...`);
 
     await executeToolWithCollapse({
@@ -183,7 +183,7 @@ async function handleUserInput(input) {
     }, activeBottomBar, 1100);
 
     // Shows thought with progress bar from Image 4
-    activeBottomBar.writeToScroll(`${chalk.bold('🧠 Thought for')} ${chalk.white('16s')}`);
+    activeBottomBar.writeToScroll(`${chalk.bold('* Thought for')} ${chalk.white('16s')}`);
     activeBottomBar.writeToScroll(
       `${chalk.dim('│')} ${chalk.white('Progress: persistence: "durable" now. The container is running with the correct mount. The desktop failed to start just now — likely because the')}\n` +
       `${chalk.dim('│')} ${chalk.white('desktop takes time to boot (supervisor). Let me wait and re-check status via the live API.')}`
@@ -192,7 +192,7 @@ async function handleUserInput(input) {
   } else if (lower.includes('read') || lower.includes('file') || lower.includes('cat') || lower.includes('view') || lower.includes('core.ts')) {
     activeBottomBar.setStatus('Thinking...');
     await new Promise(r => setTimeout(r, 400));
-    activeBottomBar.writeToScroll(`${chalk.bold('🧠 Thought for')} ${chalk.white('2s')}`);
+    activeBottomBar.writeToScroll(`${chalk.bold('* Thought for')} ${chalk.white('2s')}`);
 
     await executeToolWithCollapse({
       type: 'read',
@@ -205,7 +205,7 @@ async function handleUserInput(input) {
   } else if (lower.includes('search') || lower.includes('find') || lower.includes('grep')) {
     activeBottomBar.setStatus('Thinking...');
     await new Promise(r => setTimeout(r, 400));
-    activeBottomBar.writeToScroll(`${chalk.bold('🧠 Thought for')} ${chalk.white('2s')}`);
+    activeBottomBar.writeToScroll(`${chalk.bold('* Thought for')} ${chalk.white('2s')}`);
 
     await executeToolWithCollapse({
       type: 'search',
@@ -216,7 +216,7 @@ async function handleUserInput(input) {
     // General queries - brief thought
     activeBottomBar.setStatus('Thinking...');
     await new Promise(r => setTimeout(r, 300));
-    activeBottomBar.writeToScroll(`${chalk.bold('🧠 Thought for')} ${chalk.white('2s')}`);
+    activeBottomBar.writeToScroll(`${chalk.bold('* Thought for')} ${chalk.white('2s')}`);
   }
 
   // 4. Stream assistant response
