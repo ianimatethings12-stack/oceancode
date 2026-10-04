@@ -13,6 +13,7 @@ export const commands = {
       console.log('  /model     - Switch or view active AI model');
       console.log('  /status    - Show workspace, git, and token metrics');
       console.log('  /compact   - Compress context window tokens');
+      console.log('  /cursor    - Set cursor shape (/cursor block, steady, reset)');
       console.log('  /exit      - Exit Ocean Code\n');
       console.log('Shortcuts:');
       console.log('  Enter      - Submit prompt');
@@ -76,6 +77,26 @@ export const commands = {
       const prev = state.tokensUsed;
       state.tokensUsed = Math.max(0, Math.floor(prev * 0.3));
       console.log(`\nContext tokens compressed: ${prev} -> ${state.tokensUsed}\n`);
+    },
+  },
+
+  '/cursor': {
+    desc: 'Set or reset terminal cursor shape (block, steady, bar, default)',
+    run: (arg) => {
+      const mode = (arg || 'block').toLowerCase();
+      if (mode === 'block') {
+        process.stdout.write('\x1b[?25h\x1b[1 q');
+        console.log('\nCursor set to normal blinking block.\n');
+      } else if (mode === 'steady') {
+        process.stdout.write('\x1b[?25h\x1b[2 q');
+        console.log('\nCursor set to steady block.\n');
+      } else if (mode === 'bar' || mode === 'line') {
+        process.stdout.write('\x1b[?25h\x1b[5 q');
+        console.log('\nCursor set to vertical line / bar.\n');
+      } else {
+        process.stdout.write('\x1b[?25h\x1b[0 q');
+        console.log('\nCursor reset to terminal default.\n');
+      }
     },
   },
 

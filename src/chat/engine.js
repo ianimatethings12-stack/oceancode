@@ -5,8 +5,11 @@ import { state } from '../config.js';
 import { formatMarkdown, renderToolCall } from '../ui/markdown.js';
 import { createOceanSpinner } from '../ui/spinner.js';
 import { commands } from '../commands/handlers.js';
+import { setCursorNormal, resetCursor } from '../ui/cursor.js';
 
 export function startChat() {
+  setCursorNormal();
+
   const rl = readline.createInterface({
     input: process.stdin,
     output: process.stdout,
@@ -14,10 +17,15 @@ export function startChat() {
     historySize: 100,
   });
 
+  const promptWithCursor = () => {
+    setCursorNormal();
+    rl.prompt();
+  };
+
   let multilineBuffer = [];
   let isMultilineMode = false;
 
-  rl.prompt();
+  promptWithCursor();
 
   rl.on('line', async (line) => {
     const rawInput = line.trimEnd();
@@ -44,10 +52,10 @@ export function startChat() {
           await handleUserInput(fullInput, rl);
         } finally {
           rl.resume();
-          rl.prompt();
+          promptWithCursor();
         }
       } else {
-        rl.prompt();
+        promptWithCursor();
       }
       return;
     }
@@ -55,7 +63,7 @@ export function startChat() {
     const input = rawInput.trim();
 
     if (!input) {
-      rl.prompt();
+      promptWithCursor();
       return;
     }
 
@@ -63,11 +71,11 @@ export function startChat() {
     const [cmd, ...args] = input.split(' ');
     if (cmd.startsWith('/') && commands[cmd]) {
       commands[cmd].run(args.join(' '));
-      rl.prompt();
+      promptWithCursor();
       return;
     } else if (cmd.startsWith('/') && !commands[cmd]) {
       console.log(`Unknown command: ${cmd} (type /help for available commands)`);
-      rl.prompt();
+      promptWithCursor();
       return;
     }
 
@@ -77,11 +85,12 @@ export function startChat() {
       await handleUserInput(input, rl);
     } finally {
       rl.resume();
-      rl.prompt();
+      promptWithCursor();
     }
   });
 
   rl.on('close', () => {
+    setCursorNormal();
     console.log('\nBye!\n');
     process.exit(0);
   });

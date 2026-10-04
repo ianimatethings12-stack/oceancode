@@ -1,18 +1,36 @@
 import ora from 'ora';
 import chalk from 'chalk';
+import { setCursorNormal } from './cursor.js';
 
 export function createOceanSpinner(text = 'Thinking...') {
-  return ora({
+  const spinner = ora({
     text: chalk.dim(text),
-    spinner: 'dots',
+    spinner: {
+      interval: 100,
+      frames: ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'],
+    },
     color: 'gray',
+    discardStdin: false,
   });
+
+  const originalStop = spinner.stop.bind(spinner);
+  spinner.stop = () => {
+    originalStop();
+    setCursorNormal();
+    return spinner;
+  };
+
+  return spinner;
 }
 
 export function createToolSpinner(action, target) {
   return ora({
     text: `${chalk.dim(action)} ${target}`,
-    spinner: 'dots',
+    spinner: {
+      interval: 100,
+      frames: ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'],
+    },
     color: 'gray',
+    discardStdin: false,
   });
 }
