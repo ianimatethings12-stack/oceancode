@@ -7,6 +7,7 @@ import { commands } from '../commands/handlers.js';
 import { setCursorNormal } from '../ui/cursor.js';
 import { renderBanner } from '../ui/banner.js';
 import { BottomBar } from '../ui/bottomBar.js';
+import { executeToolWithCollapse } from '../ui/tools.js';
 
 let activeBottomBar = null;
 
@@ -86,25 +87,136 @@ async function handleUserInput(input) {
 
   activeBottomBar.writeToScroll(promptBox);
 
-  // 2. Set bottom bar status
-  activeBottomBar.setStatus('Thinking...');
-  await new Promise(resolve => setTimeout(resolve, 400));
-
-  // 3. Tool execution simulation
-  let simulatedTool = null;
   const lower = input.toLowerCase();
-  
-  if (lower.includes('file') || lower.includes('dir') || lower.includes('list') || lower.includes('ls')) {
-    simulatedTool = { type: 'read', name: 'fs.readdir(' + state.cwd + ')' };
-  } else if (lower.includes('git') || lower.includes('commit') || lower.includes('branch')) {
-    simulatedTool = { type: 'git', name: 'git status --short' };
-  } else if (lower.includes('run') || lower.includes('test') || lower.includes('exec')) {
-    simulatedTool = { type: 'exec', name: 'node --version' };
-  }
 
-  if (simulatedTool) {
-    const toolOutput = `[${simulatedTool.type}] ${simulatedTool.name} ${chalk.dim('✓')}`;
-    activeBottomBar.writeToScroll(toolOutput);
+  // 2. Multi-step or targeted tool execution
+  if (lower.includes('opencode') || lower.includes('agent') || lower.includes('step') || lower.includes('acp')) {
+    // Multi-step tool execution sequence identical to Image 3!
+    activeBottomBar.setStatus('Thinking...');
+    await new Promise(r => setTimeout(r, 400));
+    activeBottomBar.writeToScroll(`${chalk.bold('🧠 Thought for')} ${chalk.white('2s')}`);
+    activeBottomBar.writeToScroll(`Found it — opencodeGo is an ACP driver. Let me read it and the ACP core's capabilities block...`);
+
+    // Step 1: Read files
+    await executeToolWithCollapse({
+      type: 'read',
+      count: 2,
+      file: 'core.ts',
+      lines: '494-1560',
+      path: 'D:\\Omnicode\\Agents app\\core.ts',
+      commentary: `Now let me find the ACP driver factory to see its capabilities declaration...`,
+    }, activeBottomBar, 700);
+
+    // Step 2: Ran command
+    await executeToolWithCollapse({
+      type: 'command',
+      command: "cd 'D:\\Omnicode\\Agents app'; Get-ChildItem",
+    }, activeBottomBar, 700);
+
+    // Step 3: Search
+    await executeToolWithCollapse({
+      type: 'search',
+      query: 'createAcpDriver',
+      commentary: `This is the key file. Let me read the ACP core's capabilities block and verify...`,
+    }, activeBottomBar, 700);
+
+    // Step 4: Explored searches & read file
+    activeBottomBar.writeToScroll(`${chalk.bold('◎ Explored')} ${chalk.white('2 searches')}`);
+    await executeToolWithCollapse({
+      type: 'read',
+      file: 'core.ts',
+      lines: '494-1560',
+      path: 'D:\\Omnicode\\Agents app\\core.ts',
+    }, activeBottomBar, 600);
+
+    // Step 5: Second thought
+    activeBottomBar.writeToScroll(`${chalk.bold('🧠 Thought for')} ${chalk.white('4s')}`);
+    activeBottomBar.writeToScroll(`Now let me find the ACP driver's capabilities declaration and server status...`);
+
+    await executeToolWithCollapse({
+      type: 'search',
+      query: 'acpMcpServers',
+      commentary: `Now let me see the rest of acpMcpServers (whether it includes computerMcp)...`,
+    }, activeBottomBar, 600);
+
+    // Step 6: Ran 2 commands
+    await executeToolWithCollapse({
+      type: 'command',
+      count: 2,
+    }, activeBottomBar, 700);
+
+    // Step 7: Third thought & read
+    activeBottomBar.writeToScroll(`${chalk.bold('🧠 Thought for')} ${chalk.white('13s')}`);
+    activeBottomBar.writeToScroll(`The ACP driver does declare computerMcp: true. So the gate isn't closed on the\nrunning server's status.`);
+
+    await executeToolWithCollapse({
+      type: 'read',
+      file: 'index.ts',
+      lines: '8690-8900',
+      path: 'D:\\Omnicode\\Agents app\\index.ts',
+    }, activeBottomBar, 600);
+
+  } else if (lower.includes('edit') || lower.includes('modify') || lower.includes('repair') || lower.includes('vm') || lower.includes('patch') || lower.includes('change')) {
+    // Shows the exact Image 1 diff during execution, then collapses!
+    activeBottomBar.setStatus('Thinking...');
+    await new Promise(r => setTimeout(r, 400));
+    activeBottomBar.writeToScroll(`${chalk.bold('🧠 Thought for')} ${chalk.white('2s')}`);
+    activeBottomBar.writeToScroll(`Found it — opencodeGo is an ACP driver. Let me inspect repair-vm.mts and patch the container action...`);
+
+    await executeToolWithCollapse({
+      type: 'edit',
+      file: 'repair-vm.mts',
+      path: 'D:\\Omnicode\\Agents app\\.omb-scratch\\repair-vm.mts',
+      added: 7,
+      removed: 3,
+      commentary: `Applied patch to repair-vm.mts with container action persistence update.`,
+    }, activeBottomBar, 1100);
+
+  } else if (lower.includes('run') || lower.includes('cmd') || lower.includes('podman') || lower.includes('cua') || lower.includes('exec') || lower.includes('command') || lower.includes('test')) {
+    // Shows the exact Image 2 commands during execution, then collapses!
+    activeBottomBar.setStatus('Thinking...');
+    await new Promise(r => setTimeout(r, 400));
+
+    await executeToolWithCollapse({
+      type: 'command',
+      count: 2,
+    }, activeBottomBar, 1100);
+
+    // Shows thought with progress bar from Image 4
+    activeBottomBar.writeToScroll(`${chalk.bold('🧠 Thought for')} ${chalk.white('16s')}`);
+    activeBottomBar.writeToScroll(
+      `${chalk.dim('│')} ${chalk.white('Progress: persistence: "durable" now. The container is running with the correct mount. The desktop failed to start just now — likely because the')}\n` +
+      `${chalk.dim('│')} ${chalk.white('desktop takes time to boot (supervisor). Let me wait and re-check status via the live API.')}`
+    );
+
+  } else if (lower.includes('read') || lower.includes('file') || lower.includes('cat') || lower.includes('view') || lower.includes('core.ts')) {
+    activeBottomBar.setStatus('Thinking...');
+    await new Promise(r => setTimeout(r, 400));
+    activeBottomBar.writeToScroll(`${chalk.bold('🧠 Thought for')} ${chalk.white('2s')}`);
+
+    await executeToolWithCollapse({
+      type: 'read',
+      file: 'core.ts',
+      lines: '494-1560',
+      path: 'D:\\Omnicode\\Agents app\\core.ts',
+      commentary: `This is the key file. Let me read the ACP core's capabilities block and verify...`,
+    }, activeBottomBar, 900);
+
+  } else if (lower.includes('search') || lower.includes('find') || lower.includes('grep')) {
+    activeBottomBar.setStatus('Thinking...');
+    await new Promise(r => setTimeout(r, 400));
+    activeBottomBar.writeToScroll(`${chalk.bold('🧠 Thought for')} ${chalk.white('2s')}`);
+
+    await executeToolWithCollapse({
+      type: 'search',
+      query: 'createAcpDriver',
+      commentary: `Found 2 matches across workspace.`,
+    }, activeBottomBar, 900);
+  } else {
+    // General queries - brief thought
+    activeBottomBar.setStatus('Thinking...');
+    await new Promise(r => setTimeout(r, 300));
+    activeBottomBar.writeToScroll(`${chalk.bold('🧠 Thought for')} ${chalk.white('2s')}`);
   }
 
   // 4. Stream assistant response

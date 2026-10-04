@@ -50,7 +50,8 @@ export function formatMarkdown(text) {
         if (before) thinkBuffer.push(before);
         
         const thinkContent = thinkBuffer.join('\n');
-        formatted.push(chalk.dim('Thinking: ' + thinkContent.trim()));
+        const durSeconds = Math.max(2, Math.min(16, Math.round(thinkContent.length / 40)));
+        formatted.push(`${chalk.bold('🧠 Thought for')} ${chalk.white(durSeconds + 's')}\n`);
         continue;
       } else {
         thinkBuffer.push(line);

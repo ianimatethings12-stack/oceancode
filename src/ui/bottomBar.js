@@ -188,7 +188,7 @@ export class BottomBar {
     const { rows } = this.getDimensions();
     const scrollBottom = Math.max(1, rows - this.barHeight);
 
-    if (this.currentScrollRow < scrollBottom) {
+    if (this.currentScrollRow <= scrollBottom) {
       process.stdout.write(`\x1b[${this.currentScrollRow};1H\x1b[2K${line}`);
       this.currentScrollRow++;
     } else {
@@ -212,6 +212,66 @@ export class BottomBar {
       }
     }
     this.writeLine('');
+    this.render();
+  }
+
+  writeExpandedBlock(lines) {
+    const { rows } = this.getDimensions();
+    const scrollBottom = Math.max(1, rows - this.barHeight);
+
+    // Clamp visible lines to what comfortably fits in the scrolling region
+    const maxVisibleLines = Math.max(3, scrollBottom - 2);
+    const visibleLines = lines.slice(0, maxVisibleLines);
+    const lineCount = visibleLines.length;
+
+    // Remaining capacity below currentScrollRow
+    const avail = Math.max(0, scrollBottom - this.currentScrollRow + 1);
+
+    process.stdout.write('\x1b[?25l');
+
+    let startRow = this.currentScrollRow;
+
+    if (lineCount > avail) {
+      const needScroll = lineCount - avail;
+      for (let i = 0; i < needScroll; i++) {
+        process.stdout.write(`\x1b[${scrollBottom};1H\n`);
+      }
+      startRow = Math.max(1, this.currentScrollRow - needScroll);
+      this.currentScrollRow = startRow;
+    }
+
+    // Write all expanded lines in place
+    for (let i = 0; i < lineCount; i++) {
+      const row = startRow + i;
+      process.stdout.write(`\x1b[${row};1H\x1b[2K${visibleLines[i]}`);
+    }
+
+    this.currentScrollRow = startRow + lineCount;
+    process.stdout.write('\x1b[?25h');
+    this.render();
+
+    return {
+      startRow,
+      lineCount,
+    };
+  }
+
+  collapseBlock(block, collapsedLine) {
+    process.stdout.write('\x1b[?25l');
+
+    // 1. Clear all rows occupied by the expanded block
+    for (let i = 0; i < block.lineCount; i++) {
+      const r = block.startRow + i;
+      process.stdout.write(`\x1b[${r};1H\x1b[2K`);
+    }
+
+    // 2. Overwrite the start row with the collapsed summary line
+    process.stdout.write(`\x1b[${block.startRow};1H${collapsedLine}`);
+
+    // 3. Move currentScrollRow immediately to the row below the collapsed line
+    this.currentScrollRow = block.startRow + 1;
+
+    process.stdout.write('\x1b[?25h');
     this.render();
   }
 
