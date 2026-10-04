@@ -3,7 +3,7 @@ import chalk from 'chalk';
 import boxen from 'boxen';
 import fs from 'fs';
 import { state } from '../config.js';
-import { formatMarkdown, renderToolCall } from '../ui/markdown.js';
+import { formatMarkdown, formatInline, renderToolCall } from '../ui/markdown.js';
 import { createOceanSpinner } from '../ui/spinner.js';
 import { commands } from '../commands/handlers.js';
 import { setCursorNormal, resetCursor } from '../ui/cursor.js';
@@ -102,14 +102,32 @@ function getPromptString() {
 }
 
 function renderUserPromptBox(prompt) {
-  const promptBox = boxen(prompt, {
+  // Clear the previously typed raw "ocean> ..." terminal line(s) to prevent duplicate prompts
+  if (process.stdout.isTTY) {
+    const cols = process.stdout.columns || 80;
+    const lines = prompt.split('\n');
+    let totalLines = 0;
+    lines.forEach((l, idx) => {
+      const prefix = idx === 0 ? getPromptString() : '... ';
+      totalLines += Math.max(1, Math.ceil((prefix + l).length / cols));
+    });
+
+    for (let i = 0; i < totalLines; i++) {
+      process.stdout.write('\x1b[1A\x1b[2K\r');
+    }
+  }
+
+  // Format any markdown (such as **bold**, *italic*, `code`, etc.) inside the prompt box
+  const formattedPrompt = formatInline(prompt);
+
+  const promptBox = boxen(formattedPrompt, {
     borderStyle: 'single', // sharp, clean rectangle
     borderColor: 'gray',
     dimBorder: true,
     padding: { top: 0, bottom: 0, left: 1, right: 1 },
-    margin: { top: 0, bottom: 0, left: 0, right: 0 },
+    margin: { top: 0, bottom: 1, left: 0, right: 0 },
   });
-  console.log('\n' + promptBox + '\n');
+  console.log(promptBox);
 }
 
 async function handleUserInput(userInput, rl) {

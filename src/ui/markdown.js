@@ -200,14 +200,30 @@ export function formatInline(text) {
     return chalk.dim('`' + code + '`');
   });
 
-  // 3. Bold **text**
+  // 3. Bold + Italic ***text***
+  result = result.replace(/\*\*\*([^*]+)\*\*\*/g, (_, content) => {
+    return chalk.bold.italic(content);
+  });
+
+  // 4. Bold **text** or __text__
   result = result.replace(/\*\*([^*]+)\*\*/g, (_, content) => {
     return chalk.bold(content);
   });
+  result = result.replace(/__([^_]+)__/g, (_, content) => {
+    return chalk.bold(content);
+  });
 
-  // 4. Italic *text*
+  // 5. Italic *text* or _text_
   result = result.replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, (_, content) => {
     return chalk.italic(content);
+  });
+  result = result.replace(/(?<!_)_([^_]+)_(?!_)/g, (_, content) => {
+    return chalk.italic(content);
+  });
+
+  // 6. Strikethrough ~~text~~
+  result = result.replace(/~~([^~]+)~~/g, (_, content) => {
+    return chalk.strikethrough(content);
   });
 
   return result;
