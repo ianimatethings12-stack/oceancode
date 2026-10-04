@@ -18,6 +18,7 @@ export class BottomBar {
     this.isRawModeActive = false;
     this.isRendering = false;
     this.multilineBuffer = [];
+    this.currentScrollRow = 1;
   }
 
   getDimensions() {
@@ -25,6 +26,10 @@ export class BottomBar {
       rows: process.stdout.rows || 24,
       cols: process.stdout.columns || 80,
     };
+  }
+
+  setScrollRow(row) {
+    this.currentScrollRow = row;
   }
 
   setupScrollingRegion() {
@@ -96,7 +101,7 @@ export class BottomBar {
       displayContent = chalk.white(this.input);
     } else {
       const placeholder = this.multilineBuffer.length > 0 
-        ? 'continue typing... (or enter empty to finish)' 
+        ? 'continue typing... (or press Enter when done)' 
         : 'Ask anything... (or type /help for commands)';
       displayContent = chalk.dim(placeholder);
     }
@@ -167,7 +172,7 @@ export class BottomBar {
       const row2 = this.buildInputRow(innerWidth);
       process.stdout.write(`\x1b[${topRow + 1};1H\x1b[2K${row2}`);
 
-      // Row 3: Bottom border (clean, no extra compartments)
+      // Row 3: Bottom border
       const row3 = '└' + '─'.repeat(innerWidth) + '┘';
       process.stdout.write(`\x1b[${topRow + 2};1H\x1b[2K${chalk.gray(row3)}`);
 
@@ -179,28 +184,34 @@ export class BottomBar {
     }
   }
 
-  writeToScroll(text) {
+  writeLine(line) {
     const { rows } = this.getDimensions();
     const scrollBottom = Math.max(1, rows - this.barHeight);
 
+    if (this.currentScrollRow < scrollBottom) {
+      process.stdout.write(`\x1b[${this.currentScrollRow};1H\x1b[2K${line}`);
+      this.currentScrollRow++;
+    } else {
+      process.stdout.write(`\x1b[${scrollBottom};1H\n${line}`);
+    }
+  }
+
+  writeToScroll(text) {
     const lines = text.split('\n');
     for (const line of lines) {
-      process.stdout.write(`\x1b[${scrollBottom};1H\n${line}`);
+      this.writeLine(line);
     }
     this.render();
   }
 
   async streamLines(lines, delayMs = 12) {
-    const { rows } = this.getDimensions();
-    const scrollBottom = Math.max(1, rows - this.barHeight);
-
     for (const line of lines) {
-      process.stdout.write(`\x1b[${scrollBottom};1H\n${line}`);
+      this.writeLine(line);
       if (delayMs > 0) {
         await new Promise(resolve => setTimeout(resolve, delayMs));
       }
     }
-    process.stdout.write(`\x1b[${scrollBottom};1H\n`);
+    this.writeLine('');
     this.render();
   }
 

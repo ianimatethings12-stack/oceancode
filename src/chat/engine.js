@@ -25,7 +25,8 @@ export function startChat() {
   });
 
   activeBottomBar.setupScrollingRegion();
-  renderBanner();
+  const bannerRows = renderBanner();
+  activeBottomBar.setScrollRow(bannerRows + 1);
   activeBottomBar.start();
 }
 
@@ -43,7 +44,8 @@ async function handleUserInput(input) {
     if (cmd === '/clear') {
       console.clear();
       activeBottomBar.setupScrollingRegion();
-      renderBanner();
+      const bannerRows = renderBanner();
+      activeBottomBar.setScrollRow(bannerRows + 1);
       activeBottomBar.render();
       return;
     }
