@@ -1,7 +1,7 @@
 import chalk from 'chalk';
 import boxen from 'boxen';
 import highlight from 'cli-highlight';
-import { formatLatexInMarkdown } from './latex.js';
+import { formatLatexInMarkdown, renderLatexMath } from './latex.js';
 import { parseMarkdownTable } from './table.js';
 
 export function formatMarkdown(text) {
@@ -192,39 +192,41 @@ export function formatMarkdown(text) {
 export function formatInline(text) {
   if (!text) return '';
 
-  // 1. Process LaTeX math: $...$
-  let result = formatLatexInMarkdown(text);
-
-  // 2. Inline code `code`
-  result = result.replace(/`([^`]+)`/g, (_, code) => {
-    return chalk.dim('`' + code + '`');
+  // 1. Extract inline code `code` first to protect code content from formatting
+  const codeBlocks = [];
+  let result = text.replace(/`([^`]+)`/g, (_, code) => {
+    const idx = codeBlocks.length;
+    codeBlocks.push(chalk.dim('`' + code + '`'));
+    return `\uFFF0CODE${idx}\uFFF1`;
   });
 
-  // 3. Bold + Italic ***text***
-  result = result.replace(/\*\*\*([^*]+)\*\*\*/g, (_, content) => {
-    return chalk.bold.italic(content);
+  // 2. Process LaTeX math: $...$
+  const mathBlocks = [];
+  result = result.replace(/(?<!\$)\$([^$\n]+)\$(?!\$)/g, (_, math) => {
+    const idx = mathBlocks.length;
+    const rendered = renderLatexMath(math);
+    mathBlocks.push(chalk.bold(rendered));
+    return `\uFFF0MATH${idx}\uFFF1`;
   });
 
-  // 4. Bold **text** or __text__
-  result = result.replace(/\*\*([^*]+)\*\*/g, (_, content) => {
-    return chalk.bold(content);
-  });
-  result = result.replace(/__([^_]+)__/g, (_, content) => {
-    return chalk.bold(content);
-  });
+  // 3. Bold + Italic ***text*** or ___text___
+  result = result.replace(/\*\*\*([^*]+)\*\*\*/g, (_, content) => chalk.bold.italic(content));
+  result = result.replace(/___([^_]+)___/g, (_, content) => chalk.bold.italic(content));
+
+  // 4. Bold **text** or __text__ (e.g. **etc**)
+  result = result.replace(/\*\*([^*]+)\*\*/g, (_, content) => chalk.bold(content));
+  result = result.replace(/__([^_]+)__/g, (_, content) => chalk.bold(content));
 
   // 5. Italic *text* or _text_
-  result = result.replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, (_, content) => {
-    return chalk.italic(content);
-  });
-  result = result.replace(/(?<!_)_([^_]+)_(?!_)/g, (_, content) => {
-    return chalk.italic(content);
-  });
+  result = result.replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, (_, content) => chalk.italic(content));
+  result = result.replace(/(?<!_)_([^_]+)_(?!_)/g, (_, content) => chalk.italic(content));
 
   // 6. Strikethrough ~~text~~
-  result = result.replace(/~~([^~]+)~~/g, (_, content) => {
-    return chalk.strikethrough(content);
-  });
+  result = result.replace(/~~([^~]+)~~/g, (_, content) => chalk.strikethrough(content));
+
+  // 7. Restore protected tokens
+  result = result.replace(/\uFFF0MATH(\d+)\uFFF1/g, (_, idx) => mathBlocks[parseInt(idx, 10)] ?? '');
+  result = result.replace(/\uFFF0CODE(\d+)\uFFF1/g, (_, idx) => codeBlocks[parseInt(idx, 10)] ?? '');
 
   return result;
 }

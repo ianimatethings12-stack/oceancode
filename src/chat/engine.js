@@ -103,7 +103,7 @@ function getPromptString() {
 
 function renderUserPromptBox(prompt) {
   // Clear the previously typed raw "ocean> ..." terminal line(s) to prevent duplicate prompts
-  if (process.stdout.isTTY) {
+  try {
     const cols = process.stdout.columns || 80;
     const lines = prompt.split('\n');
     let totalLines = 0;
@@ -113,8 +113,14 @@ function renderUserPromptBox(prompt) {
     });
 
     for (let i = 0; i < totalLines; i++) {
-      process.stdout.write('\x1b[1A\x1b[2K\r');
+      readline.moveCursor(process.stdout, 0, -1);
+      readline.clearLine(process.stdout, 0);
     }
+    readline.cursorTo(process.stdout, 0);
+  } catch {
+    try {
+      process.stdout.write('\x1b[1A\x1b[2K\r');
+    } catch {}
   }
 
   // Format any markdown (such as **bold**, *italic*, `code`, etc.) inside the prompt box
