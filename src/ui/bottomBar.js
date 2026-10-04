@@ -10,7 +10,7 @@ export class BottomBar {
     this.onExit = options.onExit || (() => {});
     this.input = '';
     this.cursorPos = 0;
-    this.barHeight = 5;
+    this.barHeight = 3; // 3 lines only: top border with model, input line, bottom border
     this.history = [];
     this.historyIndex = -1;
     this.savedInput = '';
@@ -78,14 +78,73 @@ export class BottomBar {
 
   setStatus(msg) {
     this.statusMessage = msg;
-    this.render();
+    this.renderInputOnly();
   }
 
   clearStatus() {
     this.statusMessage = null;
-    this.render();
+    this.renderInputOnly();
   }
 
+  buildInputRow(innerWidth) {
+    const promptPrefix = this.multilineBuffer.length > 0 ? ' ... ' : ' > ';
+    let displayContent = '';
+
+    if (this.statusMessage) {
+      displayContent = chalk.dim(this.statusMessage);
+    } else if (this.input) {
+      displayContent = chalk.white(this.input);
+    } else {
+      const placeholder = this.multilineBuffer.length > 0 
+        ? 'continue typing... (or enter empty to finish)' 
+        : 'Ask anything... (or type /help for commands)';
+      displayContent = chalk.dim(placeholder);
+    }
+
+    const maxInputChars = innerWidth - stripAnsi(promptPrefix).length - 1;
+    let visibleInput = displayContent;
+    if (stripAnsi(this.input).length > maxInputChars) {
+      visibleInput = chalk.white('...' + this.input.slice(-maxInputChars + 3));
+    }
+
+    const inputLineRaw = promptPrefix + stripAnsi(visibleInput);
+    const padLen = Math.max(0, innerWidth - inputLineRaw.length);
+    return chalk.gray('│') + chalk.dim(promptPrefix) + visibleInput + ' '.repeat(padLen) + chalk.gray('│');
+  }
+
+  positionCursor(inputRow, innerWidth) {
+    if (!this.statusMessage) {
+      const promptPrefix = this.multilineBuffer.length > 0 ? ' ... ' : ' > ';
+      const maxInputChars = innerWidth - stripAnsi(promptPrefix).length - 1;
+      const cursorCol = 1 + stripAnsi(promptPrefix).length + Math.min(this.cursorPos, maxInputChars) + 1;
+      process.stdout.write(`\x1b[${inputRow};${cursorCol}H`);
+    } else {
+      process.stdout.write(`\x1b[${inputRow};2H`);
+    }
+  }
+
+  // Fast targeted update for keystrokes: ONLY touches Row 2 and hides cursor to prevent jumping/flickering
+  renderInputOnly() {
+    if (this.isRendering) return;
+    this.isRendering = true;
+
+    try {
+      const { rows, cols } = this.getDimensions();
+      const topRow = rows - this.barHeight + 1;
+      const boxWidth = Math.max(20, cols - 1);
+      const innerWidth = boxWidth - 2;
+
+      process.stdout.write('\x1b[?25l');
+      const row2 = this.buildInputRow(innerWidth);
+      process.stdout.write(`\x1b[${topRow + 1};1H\x1b[2K${row2}`);
+      this.positionCursor(topRow + 1, innerWidth);
+      process.stdout.write('\x1b[?25h');
+    } finally {
+      this.isRendering = false;
+    }
+  }
+
+  // Full render (drawn on start, resize, submit, or clear)
   render() {
     if (this.isRendering) return;
     this.isRendering = true;
@@ -93,87 +152,28 @@ export class BottomBar {
     try {
       const { rows, cols } = this.getDimensions();
       const topRow = rows - this.barHeight + 1;
-      const innerWidth = Math.max(10, cols - 2);
+      const boxWidth = Math.max(20, cols - 1);
+      const innerWidth = boxWidth - 2;
 
-      // Save cursor position
-      process.stdout.write('\x1b7');
+      process.stdout.write('\x1b[?25l');
 
-      // Row 1: Top border with title
-      const title = ' Input ';
-      const borderFill = Math.max(0, innerWidth - title.length - 2);
+      // Row 1: Top border with active model name
+      const title = ` ${state.model} `;
+      const borderFill = Math.max(0, boxWidth - title.length - 3);
       const row1 = '┌─' + chalk.dim(title) + '─'.repeat(borderFill) + '┐';
       process.stdout.write(`\x1b[${topRow};1H\x1b[2K${chalk.gray(row1)}`);
 
-      // Row 2: Prompt and input area
-      const promptPrefix = this.multilineBuffer.length > 0 ? ' ... ' : ' > ';
-      let displayContent = '';
-
-      if (this.statusMessage) {
-        displayContent = chalk.dim(this.statusMessage);
-      } else if (this.input) {
-        displayContent = chalk.white(this.input);
-      } else {
-        const placeholder = this.multilineBuffer.length > 0 
-          ? 'continue typing... (or press Enter when done)' 
-          : 'Ask anything... (or type /help for commands)';
-        displayContent = chalk.dim(placeholder);
-      }
-
-      // Truncate if exceeding available line width
-      const maxInputChars = innerWidth - stripAnsi(promptPrefix).length - 1;
-      let visibleInput = displayContent;
-      if (stripAnsi(this.input).length > maxInputChars) {
-        visibleInput = chalk.white('...' + this.input.slice(-maxInputChars + 3));
-      }
-
-      const inputLineRaw = promptPrefix + stripAnsi(visibleInput);
-      const padLen = Math.max(0, innerWidth - inputLineRaw.length);
-      const row2 = chalk.gray('│') + chalk.dim(promptPrefix) + visibleInput + ' '.repeat(padLen) + chalk.gray('│');
+      // Row 2: Input prompt
+      const row2 = this.buildInputRow(innerWidth);
       process.stdout.write(`\x1b[${topRow + 1};1H\x1b[2K${row2}`);
 
-      // Row 3: Middle divider
-      const row3 = '├' + '─'.repeat(innerWidth) + '┤';
+      // Row 3: Bottom border (clean, no extra compartments)
+      const row3 = '└' + '─'.repeat(innerWidth) + '┘';
       process.stdout.write(`\x1b[${topRow + 2};1H\x1b[2K${chalk.gray(row3)}`);
 
-      // Row 4: Status line with active Model Name written at the bottom
-      const branchPart = state.gitBranch && state.gitBranch !== 'none' ? `:${state.gitBranch}` : '';
-      const leftText = ` ${state.cwd}${branchPart} `;
-      const modelText = ` Model: ${state.model} `;
-      const rightText = ' /help ';
-
-      const leftFmt = chalk.dim(leftText);
-      const modelFmt = chalk.bold.white(modelText);
-      const rightFmt = chalk.dim(rightText);
-
-      const lLen = stripAnsi(leftText).length;
-      const mLen = stripAnsi(modelText).length;
-      const rLen = stripAnsi(rightText).length;
-
-      const avail = innerWidth - (lLen + mLen + rLen);
-      let line4Body = '';
-      if (avail >= 2) {
-        const pad1 = Math.floor(avail / 2);
-        const pad2 = avail - pad1;
-        line4Body = leftFmt + ' '.repeat(pad1) + modelFmt + ' '.repeat(pad2) + rightFmt;
-      } else {
-        line4Body = (leftFmt + ' ' + modelFmt).slice(0, innerWidth);
-      }
-      const rawBodyLen = stripAnsi(line4Body).length;
-      const row4Pad = Math.max(0, innerWidth - rawBodyLen);
-      const row4 = chalk.gray('│') + line4Body + ' '.repeat(row4Pad) + chalk.gray('│');
-      process.stdout.write(`\x1b[${topRow + 3};1H\x1b[2K${row4}`);
-
-      // Row 5: Bottom border
-      const row5 = '└' + '─'.repeat(innerWidth) + '┘';
-      process.stdout.write(`\x1b[${topRow + 4};1H\x1b[2K${chalk.gray(row5)}`);
-
-      // Position terminal cursor right inside the input row at the typing position
-      if (!this.statusMessage) {
-        const cursorCol = 1 + stripAnsi(promptPrefix).length + Math.min(this.cursorPos, maxInputChars) + 1;
-        process.stdout.write(`\x1b[${topRow + 1};${cursorCol}H`);
-      } else {
-        process.stdout.write('\x1b8');
-      }
+      // Position cursor at typing location and show
+      this.positionCursor(topRow + 1, innerWidth);
+      process.stdout.write('\x1b[?25h');
     } finally {
       this.isRendering = false;
     }
@@ -190,7 +190,7 @@ export class BottomBar {
     this.render();
   }
 
-  async streamLines(lines, delayMs = 15) {
+  async streamLines(lines, delayMs = 12) {
     const { rows } = this.getDimensions();
     const scrollBottom = Math.max(1, rows - this.barHeight);
 
@@ -213,7 +213,7 @@ export class BottomBar {
         this.input = '';
         this.cursorPos = 0;
         this.multilineBuffer = [];
-        this.render();
+        this.renderInputOnly();
         return;
       }
       this.stop();
@@ -230,7 +230,7 @@ export class BottomBar {
         this.multilineBuffer.push(raw.slice(0, -1));
         this.input = '';
         this.cursorPos = 0;
-        this.render();
+        this.renderInputOnly();
         return;
       }
 
@@ -240,7 +240,7 @@ export class BottomBar {
         this.multilineBuffer = [];
         this.input = '';
         this.cursorPos = 0;
-        this.render();
+        this.renderInputOnly();
         if (fullInput) {
           this.history.push(fullInput);
           this.historyIndex = -1;
@@ -252,7 +252,7 @@ export class BottomBar {
       const input = raw.trim();
       this.input = '';
       this.cursorPos = 0;
-      this.render();
+      this.renderInputOnly();
 
       if (input) {
         this.history.push(input);
@@ -267,7 +267,7 @@ export class BottomBar {
       if (this.cursorPos > 0) {
         this.input = this.input.slice(0, this.cursorPos - 1) + this.input.slice(this.cursorPos);
         this.cursorPos--;
-        this.render();
+        this.renderInputOnly();
       }
       return;
     }
@@ -276,7 +276,7 @@ export class BottomBar {
     if (key.name === 'delete') {
       if (this.cursorPos < this.input.length) {
         this.input = this.input.slice(0, this.cursorPos) + this.input.slice(this.cursorPos + 1);
-        this.render();
+        this.renderInputOnly();
       }
       return;
     }
@@ -285,7 +285,7 @@ export class BottomBar {
     if (key.name === 'left') {
       if (this.cursorPos > 0) {
         this.cursorPos--;
-        this.render();
+        this.renderInputOnly();
       }
       return;
     }
@@ -294,7 +294,7 @@ export class BottomBar {
     if (key.name === 'right') {
       if (this.cursorPos < this.input.length) {
         this.cursorPos++;
-        this.render();
+        this.renderInputOnly();
       }
       return;
     }
@@ -302,14 +302,14 @@ export class BottomBar {
     // Home / Ctrl+A
     if (key.name === 'home' || (key.ctrl && key.name === 'a')) {
       this.cursorPos = 0;
-      this.render();
+      this.renderInputOnly();
       return;
     }
 
     // End / Ctrl+E
     if (key.name === 'end' || (key.ctrl && key.name === 'e')) {
       this.cursorPos = this.input.length;
-      this.render();
+      this.renderInputOnly();
       return;
     }
 
@@ -317,7 +317,7 @@ export class BottomBar {
     if (key.ctrl && key.name === 'u') {
       this.input = '';
       this.cursorPos = 0;
-      this.render();
+      this.renderInputOnly();
       return;
     }
 
@@ -332,7 +332,7 @@ export class BottomBar {
       }
       this.input = this.history[this.historyIndex];
       this.cursorPos = this.input.length;
-      this.render();
+      this.renderInputOnly();
       return;
     }
 
@@ -347,7 +347,7 @@ export class BottomBar {
         this.input = this.savedInput;
       }
       this.cursorPos = this.input.length;
-      this.render();
+      this.renderInputOnly();
       return;
     }
 
@@ -355,7 +355,7 @@ export class BottomBar {
     if (str && !key.ctrl && !key.meta) {
       this.input = this.input.slice(0, this.cursorPos) + str + this.input.slice(this.cursorPos);
       this.cursorPos += str.length;
-      this.render();
+      this.renderInputOnly();
     }
   }
 }
