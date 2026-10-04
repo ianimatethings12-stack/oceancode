@@ -121,21 +121,21 @@ export function formatMarkdown(text) {
 
     // Headers
     if (line.startsWith('### ')) {
-      formatted.push('\n' + chalk.bold(line.slice(4)));
+      formatted.push('\n' + chalk.bold.white('▸ ' + formatInline(line.slice(4))));
       continue;
     }
     if (line.startsWith('## ')) {
-      formatted.push('\n' + chalk.bold(line.slice(3)));
+      formatted.push('\n' + chalk.bold.white('◆ ' + formatInline(line.slice(3))));
       continue;
     }
     if (line.startsWith('# ')) {
-      formatted.push('\n' + chalk.bold(line.slice(2)));
+      formatted.push('\n' + chalk.bold.white('◈ ' + formatInline(line.slice(2))));
       continue;
     }
 
     // Blockquotes
     if (line.startsWith('> ')) {
-      formatted.push(`  ${chalk.dim('│')} ${chalk.dim(formatInline(line.slice(2)))}`);
+      formatted.push(`  ${chalk.gray('│')} ${chalk.italic.white(formatInline(line.slice(2)))}`);
       continue;
     }
 
@@ -144,7 +144,7 @@ export function formatMarkdown(text) {
     if (taskMatch) {
       const indent = taskMatch[1].length;
       const isDone = taskMatch[2].toLowerCase() === 'x';
-      const checkMark = isDone ? chalk.bold('☑') : chalk.dim('☐');
+      const checkMark = isDone ? chalk.bold.white('☑') : chalk.dim('☐');
       formatted.push(`${' '.repeat(indent)}  ${checkMark} ${formatInline(taskMatch[3])}`);
       continue;
     }
@@ -162,7 +162,7 @@ export function formatMarkdown(text) {
         dot = '◦';
       }
 
-      formatted.push(`${' '.repeat(indent)}  ${chalk.bold(dot)} ${formatInline(bulletContent)}`);
+      formatted.push(`${' '.repeat(indent)}  ${chalk.bold.white(dot)} ${formatInline(bulletContent)}`);
       continue;
     }
 
@@ -196,7 +196,7 @@ export function formatInline(text) {
   const codeBlocks = [];
   let result = text.replace(/`([^`]+)`/g, (_, code) => {
     const idx = codeBlocks.length;
-    codeBlocks.push(chalk.dim('`' + code + '`'));
+    codeBlocks.push(chalk.dim('`') + chalk.bold.white(code) + chalk.dim('`'));
     return `\uFFF0CODE${idx}\uFFF1`;
   });
 

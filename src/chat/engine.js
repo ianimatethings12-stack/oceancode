@@ -1,154 +1,96 @@
-import readline from 'readline';
 import chalk from 'chalk';
 import boxen from 'boxen';
 import fs from 'fs';
 import { state } from '../config.js';
 import { formatMarkdown, formatInline, renderToolCall } from '../ui/markdown.js';
-import { createOceanSpinner } from '../ui/spinner.js';
 import { commands } from '../commands/handlers.js';
-import { setCursorNormal, resetCursor } from '../ui/cursor.js';
+import { setCursorNormal } from '../ui/cursor.js';
+import { renderBanner } from '../ui/banner.js';
+import { BottomBar } from '../ui/bottomBar.js';
+
+let activeBottomBar = null;
 
 export function startChat() {
   setCursorNormal();
 
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-    prompt: getPromptString(),
-    historySize: 100,
+  activeBottomBar = new BottomBar({
+    onSubmit: async (input) => {
+      await handleUserInput(input);
+    },
+    onExit: () => {
+      setCursorNormal();
+      console.log('\nBye!\n');
+      process.exit(0);
+    },
   });
 
-  const promptWithCursor = () => {
-    setCursorNormal();
-    rl.prompt();
-  };
+  activeBottomBar.setupScrollingRegion();
+  renderBanner();
+  activeBottomBar.start();
+}
 
-  let multilineBuffer = [];
-  let isMultilineMode = false;
-
-  promptWithCursor();
-
-  rl.on('line', async (line) => {
-    const rawInput = line.trimEnd();
-
-    // Multi-line continuation (line ending with backslash '\')
-    if (rawInput.endsWith('\\')) {
-      multilineBuffer.push(rawInput.slice(0, -1));
-      isMultilineMode = true;
-      rl.setPrompt(chalk.dim('... '));
-      rl.prompt();
+async function handleUserInput(input) {
+  // Slash commands
+  const [cmd, ...args] = input.split(' ');
+  if (cmd.startsWith('/')) {
+    if (cmd === '/exit') {
+      activeBottomBar.stop();
+      console.log('\nBye!\n');
+      process.exit(0);
       return;
     }
 
-    if (isMultilineMode) {
-      multilineBuffer.push(rawInput);
-      const fullInput = multilineBuffer.join('\n').trim();
-      multilineBuffer = [];
-      isMultilineMode = false;
-      rl.setPrompt(getPromptString());
+    if (cmd === '/clear') {
+      console.clear();
+      activeBottomBar.setupScrollingRegion();
+      renderBanner();
+      activeBottomBar.render();
+      return;
+    }
 
-      if (fullInput) {
-        rl.pause();
-        try {
-          await handleUserInput(fullInput, rl);
-        } finally {
-          rl.resume();
-          promptWithCursor();
-        }
-      } else {
-        promptWithCursor();
+    if (commands[cmd]) {
+      let captured = '';
+      const originalLog = console.log;
+      console.log = (...msgs) => {
+        captured += msgs.join(' ') + '\n';
+      };
+
+      try {
+        commands[cmd].run(args.join(' '));
+      } finally {
+        console.log = originalLog;
       }
+
+      if (captured) {
+        activeBottomBar.writeToScroll(captured.trimEnd());
+      }
+      activeBottomBar.render();
+      return;
+    } else {
+      activeBottomBar.writeToScroll(`Unknown command: ${cmd} (type /help for available commands)`);
       return;
     }
-
-    const input = rawInput.trim();
-
-    if (!input) {
-      promptWithCursor();
-      return;
-    }
-
-    // Slash commands
-    const [cmd, ...args] = input.split(' ');
-    if (cmd.startsWith('/') && commands[cmd]) {
-      commands[cmd].run(args.join(' '));
-      promptWithCursor();
-      return;
-    } else if (cmd.startsWith('/') && !commands[cmd]) {
-      console.log(`Unknown command: ${cmd} (type /help for available commands)`);
-      promptWithCursor();
-      return;
-    }
-
-    // Regular conversation query
-    rl.pause();
-    try {
-      await handleUserInput(input, rl);
-    } finally {
-      rl.resume();
-      promptWithCursor();
-    }
-  });
-
-  rl.on('close', () => {
-    setCursorNormal();
-    console.log('\nBye!\n');
-    process.exit(0);
-  });
-}
-
-function getPromptString() {
-  return 'ocean> ';
-}
-
-function renderUserPromptBox(prompt) {
-  // Clear the previously typed raw "ocean> ..." terminal line(s) to prevent duplicate prompts
-  try {
-    const cols = process.stdout.columns || 80;
-    const lines = prompt.split('\n');
-    let totalLines = 0;
-    lines.forEach((l, idx) => {
-      const prefix = idx === 0 ? getPromptString() : '... ';
-      totalLines += Math.max(1, Math.ceil((prefix + l).length / cols));
-    });
-
-    for (let i = 0; i < totalLines; i++) {
-      readline.moveCursor(process.stdout, 0, -1);
-      readline.clearLine(process.stdout, 0);
-    }
-    readline.cursorTo(process.stdout, 0);
-  } catch {
-    try {
-      process.stdout.write('\x1b[1A\x1b[2K\r');
-    } catch {}
   }
 
-  // Format any markdown (such as **bold**, *italic*, `code`, etc.) inside the prompt box
-  const formattedPrompt = formatInline(prompt);
-
+  // 1. Render user prompt in a clean sharp rectangle box in the scrolling viewport
+  const formattedPrompt = formatInline(input);
   const promptBox = boxen(formattedPrompt, {
     borderStyle: 'single', // sharp, clean rectangle
     borderColor: 'gray',
     dimBorder: true,
     padding: { top: 0, bottom: 0, left: 1, right: 1 },
-    margin: { top: 0, bottom: 1, left: 0, right: 0 },
+    margin: { top: 0, bottom: 0, left: 0, right: 0 },
   });
-  console.log(promptBox);
-}
 
-async function handleUserInput(userInput, rl) {
-  // Render user prompt in a clean sharp rectangle
-  renderUserPromptBox(userInput);
+  activeBottomBar.writeToScroll(promptBox);
 
-  // Spinner
-  const spinner = createOceanSpinner('Thinking...');
-  spinner.start();
+  // 2. Set bottom bar status
+  activeBottomBar.setStatus('Thinking...');
+  await new Promise(resolve => setTimeout(resolve, 400));
 
-  const startTime = Date.now();
-  await new Promise(resolve => setTimeout(resolve, 500));
-
+  // 3. Tool execution simulation
   let simulatedTool = null;
-  const lower = userInput.toLowerCase();
+  const lower = input.toLowerCase();
   
   if (lower.includes('file') || lower.includes('dir') || lower.includes('list') || lower.includes('ls')) {
     simulatedTool = { type: 'read', name: 'fs.readdir(' + state.cwd + ')' };
@@ -158,30 +100,25 @@ async function handleUserInput(userInput, rl) {
     simulatedTool = { type: 'exec', name: 'node --version' };
   }
 
-  spinner.stop();
-
-  // Tool execution
   if (simulatedTool) {
-    renderToolCall(simulatedTool.type, simulatedTool.name, 'success');
+    const toolOutput = `[${simulatedTool.type}] ${simulatedTool.name} ${chalk.dim('✓')}`;
+    activeBottomBar.writeToScroll(toolOutput);
   }
 
-  // Assistant response
-  const responseMarkdown = generateAssistantResponse(userInput);
-  await streamMarkdown(responseMarkdown);
-  console.log('');
-
-  const tokenCount = Math.floor(userInput.length / 3) + Math.floor(responseMarkdown.length / 3.5);
-  state.tokensUsed += tokenCount;
-}
-
-async function streamMarkdown(markdownText) {
-  const formatted = formatMarkdown(markdownText);
+  // 4. Stream assistant response
+  activeBottomBar.setStatus('Generating response...');
+  const responseMarkdown = generateAssistantResponse(input);
+  const formatted = formatMarkdown(responseMarkdown);
   const lines = formatted.split('\n');
 
-  for (const line of lines) {
-    console.log(line);
-    await new Promise(resolve => setTimeout(resolve, 15));
-  }
+  await activeBottomBar.streamLines(lines, 12);
+
+  // 5. Update token metrics
+  const tokenCount = Math.floor(input.length / 3) + Math.floor(responseMarkdown.length / 3.5);
+  state.tokensUsed += tokenCount;
+
+  // 6. Clear status and re-activate input prompt
+  activeBottomBar.clearStatus();
 }
 
 function generateAssistantResponse(prompt) {
@@ -233,7 +170,7 @@ What would you like to work on?
   • Refactoring: Clean up structure, add TypeScript types, reduce technical debt
   • Debugging: Analyze errors, logs, and stack traces
 
-Type your prompt, ask for formulas, tables, or run /help for available commands.`;
+Type your prompt below, ask for formulas, tables, or run /help for available commands.`;
   }
 
   // Files

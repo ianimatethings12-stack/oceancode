@@ -1,6 +1,7 @@
 import figlet from 'figlet';
 import chalk from 'chalk';
 import { renderHr } from './colors.js';
+import { state } from '../config.js';
 
 // Geometric sacred/cybernetic emblem extracted from user logo
 const logoLines = [
@@ -35,8 +36,22 @@ export function renderBanner() {
     bannerOutput.push(chalk.bold.white(textPart) + '   ' + chalk.dim.gray(logoPart));
   }
 
-  console.log('\n' + bannerOutput.join('\n'));
+  // OpenCode-style top session header
+  const branchPart = state.gitBranch && state.gitBranch !== 'none' ? `:${state.gitBranch}` : '';
+  const topMeta = `${chalk.dim(state.cwd + branchPart)}  ${chalk.dim('·')}  ${chalk.dim('v' + state.version)}  ${chalk.dim('·')}  ${chalk.dim('Interactive Session')}`;
+
+  console.log('\n' + topMeta + '\n');
+  console.log(bannerOutput.join('\n'));
   console.log(renderHr() + '\n');
+
+  // OpenCode-style prompt suggestions cards
+  console.log(chalk.bold.white('Suggestions:'));
+  console.log(chalk.dim('  ▸ ') + chalk.white('"What is the tech stack and structure of this project?"'));
+  console.log(chalk.dim('  ▸ ') + chalk.white('"Formulate mathematical proofs and equations using LaTeX"'));
+  console.log(chalk.dim('  ▸ ') + chalk.white('"Inspect git status, run tests, or refactor code"'));
+  console.log('');
+  console.log(chalk.dim('Type your prompt in the bottom bar below · /help for commands · /model to switch'));
+  console.log('');
 }
 
 export function renderMiniHeader() {
