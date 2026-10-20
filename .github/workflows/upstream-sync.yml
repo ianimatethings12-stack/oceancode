@@ -81,6 +81,14 @@ jobs:
           bun script/rebrand.ts --apply
           bun script/rebrand.ts --check --json || true
 
+      - name: Bump OceanCode Version (+0.0.1 up to .30 then next minor)
+        if: steps.check_release.outputs.needs_sync == 'true'
+        id: bump_version
+        run: |
+          NEW_VER=$(bun script/bump-version.ts)
+          echo "version=$NEW_VER" >> "$GITHUB_OUTPUT"
+          echo "Bumped OceanCode version to $NEW_VER"
+
       - name: Run Typecheck
         if: steps.check_release.outputs.needs_sync == 'true'
         id: typecheck
@@ -95,9 +103,10 @@ jobs:
         if: steps.check_release.outputs.needs_sync == 'true'
         run: |
           TAG="${{ steps.check_release.outputs.tag }}"
+          VER="${{ steps.bump_version.outputs.version }}"
           if [ -n "$(git status --porcelain)" ]; then
             git add -A
-            git commit -m "chore(rebrand): apply OceanCode branding for upstream $TAG"
+            git commit -m "chore(release): bump OceanCode to v${VER} (synced upstream ${TAG})"
           fi
 
       # ---------------------------------------------------------------
@@ -109,13 +118,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG="${{ steps.check_release.outputs.tag }}"
+          VER="${{ steps.bump_version.outputs.version }}"
           SYNC_BRANCH="${{ steps.sync_branch.outputs.branch }}"
           echo "Typecheck passed! Auto-merging $SYNC_BRANCH directly into dev..."
           
           git checkout dev
-          git merge "$SYNC_BRANCH" -m "feat(sync): automatically sync upstream $TAG with OceanCode branding"
+          git merge "$SYNC_BRANCH" -m "feat(release): OceanCode v${VER} (synced upstream ${TAG})"
           git push origin dev
-          echo "Successfully auto-merged and pushed upstream $TAG to dev with zero manual intervention!"
+          echo "Successfully auto-merged and pushed OceanCode v${VER} to dev!"
 
       # ---------------------------------------------------------------
       # Safety Fallback: If Typecheck Failed -> Open an Action Required PR
@@ -126,19 +136,21 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG="${{ steps.check_release.outputs.tag }}"
+          VER="${{ steps.bump_version.outputs.version }}"
           SYNC_BRANCH="${{ steps.sync_branch.outputs.branch }}"
           
           git push origin "$SYNC_BRANCH" --force
           
           EXISTING_PR=$(gh pr list --head "$SYNC_BRANCH" --json number -q '.[0].number' 2>/dev/null || true)
           
-          PR_TITLE="⚠️ [ACTION REQUIRED] Upstream ${TAG} sync needs manual review (Typecheck Failed)"
+          PR_TITLE="⚠️ [ACTION REQUIRED] OceanCode v${VER} sync (upstream ${TAG}) needs review"
           PR_BODY="### Automated Daily Upstream Sync - Attention Required
 
-Upstream release \`${TAG}\` was pulled and rebranded, but \`bun typecheck\` encountered compiler errors or breaking changes.
+Upstream release \`${TAG}\` was pulled, rebranded, and bumped to OceanCode \`v${VER}\`, but \`bun typecheck\` encountered compiler errors or breaking changes.
 
 To protect \`dev\`, this release was **not** auto-merged.
 
+- **OceanCode Version**: \`v${VER}\`
 - **Upstream Tag**: \`${TAG}\`
 - **Rebrand Pipeline**: Executed
 - **Typecheck Status**: \`FAILED\`
