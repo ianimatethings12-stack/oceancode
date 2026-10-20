@@ -12,23 +12,16 @@ import "./env"
 const app = "oceancode"
 const legacyApp = "opencode"
 
-const data = existingRoot(xdgData!, app)
-const cache = existingRoot(xdgCache!, app)
+const data = path.join(xdgData!, app)
+const cache = path.join(xdgCache!, app)
 const config = path.join(xdgConfig!, app)
-const state = existingRoot(xdgState!, app)
+const state = path.join(xdgState!, app)
 const tmp = path.join(os.tmpdir(), app)
 
-// Existing installs keep their data, cache, and state directories. Config is
-// copied once so the new location is authoritative without losing settings.
+// Existing config is copied once so the new location is authoritative without losing settings.
 const legacyConfig = path.join(xdgConfig!, legacyApp)
 if (!existsSync(config) && existsSync(legacyConfig)) {
   await fs.cp(legacyConfig, config, { recursive: true }).catch(() => {})
-}
-
-function existingRoot(base: string, name: string) {
-  const next = path.join(base, name)
-  const previous = path.join(base, legacyApp)
-  return existsSync(previous) && !existsSync(next) ? previous : next
 }
 
 const paths = {

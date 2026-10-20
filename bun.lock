@@ -289,7 +289,7 @@
     },
     "packages/core": {
       "name": "@opencode-ai/core",
-      "version": "0.1.3",
+      "version": "0.1.4",
       "bin": {
         "opencode": "./bin/opencode",
       },
@@ -384,7 +384,7 @@
     },
     "packages/desktop": {
       "name": "@opencode-ai/desktop",
-      "version": "0.1.3",
+      "version": "0.1.4",
       "dependencies": {
         "@zip.js/zip.js": "2.7.62",
         "drizzle-orm": "catalog:",
@@ -563,7 +563,7 @@
     },
     "packages/oceancode": {
       "name": "oceancode",
-      "version": "0.1.3",
+      "version": "0.1.4",
       "bin": {
         "ocean": "./bin/ocean",
         "oceancode": "./bin/ocean",
