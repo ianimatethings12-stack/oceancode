@@ -1,12 +1,9 @@
 <p align="center">
   <a href="https://github.com/ianimatethings12-stack/oceancode">
-    <picture>
-      <source srcset="packages/web/src/assets/oceancode-logo-dark.svg" media="(prefers-color-scheme: dark)">
-      <source srcset="packages/web/src/assets/oceancode-logo-light.svg" media="(prefers-color-scheme: light)">
-      <img src="packages/web/src/assets/oceancode-logo-light.svg" alt="OceanCode logo">
-    </picture>
+    <img src="packages/web/src/assets/ocean-logo.png" width="130" alt="OceanCode logo" />
   </a>
 </p>
+<h1 align="center">OceanCode</h1>
 <p align="center">Açık kaynaklı yapay zeka kodlama asistanı.</p>
 <p align="center">
   <a href="https://github.com/ianimatethings12-stack/oceancode/discussions"><img alt="Discord" src="https://img.shields.io/discord/1391832426048651334?style=flat-square&label=discord" /></a>
