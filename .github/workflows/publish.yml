@@ -41,7 +41,7 @@ env:
 jobs:
   version:
     runs-on: blacksmith-4vcpu-ubuntu-2404
-    if: github.repository == 'anomalyco/opencode'
+    if: github.repository == 'ianimatethings12-stack/oceancode'
     steps:
       - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
         with:
@@ -58,7 +58,7 @@ jobs:
 
       - name: Install OpenCode
         if: inputs.bump || inputs.version
-        run: bun i -g opencode-ai
+        run: bun i -g oceancode
 
       - id: version
         run: |
@@ -77,7 +77,7 @@ jobs:
     needs: version
     runs-on: blacksmith-4vcpu-ubuntu-2404
     timeout-minutes: 30
-    if: github.repository == 'anomalyco/opencode'
+    if: github.repository == 'ianimatethings12-stack/oceancode'
     steps:
       - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
         with:
@@ -96,7 +96,7 @@ jobs:
 
       - name: Build legacy CLI
         if: github.ref_name != 'dev' && github.ref_name != 'beta'
-        run: ./packages/opencode/script/build.ts ${{ (github.ref_name == 'beta' && '--sourcemaps') || '' }}
+        run: ./packages/oceancode/script/build.ts ${{ (github.ref_name == 'beta' && '--sourcemaps') || '' }}
         env:
           OPENCODE_VERSION: ${{ needs.version.outputs.version }}
           OPENCODE_RELEASE: ${{ needs.version.outputs.release }}
@@ -117,16 +117,16 @@ jobs:
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: github.ref_name != 'dev' && github.ref_name != 'beta'
         with:
-          name: opencode-cli
+          name: oceancode-cli
           path: |
-            packages/opencode/dist/opencode-darwin*
-            packages/opencode/dist/opencode-linux*
+            packages/oceancode/dist/opencode-darwin*
+            packages/oceancode/dist/opencode-linux*
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: github.ref_name != 'dev' && github.ref_name != 'beta'
         with:
-          name: opencode-cli-windows
-          path: packages/opencode/dist/opencode-windows*
+          name: oceancode-cli-windows
+          path: packages/oceancode/dist/opencode-windows*
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
@@ -140,7 +140,7 @@ jobs:
     needs: build-cli
     runs-on: macos-26
     # Beta publishes only the desktop app, which signs the CLI it bundles.
-    if: github.repository == 'anomalyco/opencode' && github.ref_name != 'beta'
+    if: github.repository == 'ianimatethings12-stack/oceancode' && github.ref_name != 'beta'
     steps:
       - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
 
@@ -195,7 +195,7 @@ jobs:
     needs: version
     runs-on: blacksmith-4vcpu-ubuntu-2404
     timeout-minutes: 30
-    if: github.repository == 'anomalyco/opencode' && github.ref_name != 'beta' && !(github.ref_name == 'dev' && (inputs.bump || inputs.version))
+    if: github.repository == 'ianimatethings12-stack/oceancode' && github.ref_name != 'beta' && !(github.ref_name == 'dev' && (inputs.bump || inputs.version))
     steps:
       - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
 
@@ -217,7 +217,7 @@ jobs:
     needs:
       - version
       - build-node-app-archive
-    if: github.repository == 'anomalyco/opencode' && github.ref_name != 'beta' && !(github.ref_name == 'dev' && (inputs.bump || inputs.version))
+    if: github.repository == 'ianimatethings12-stack/oceancode' && github.ref_name != 'beta' && !(github.ref_name == 'dev' && (inputs.bump || inputs.version))
     strategy:
       fail-fast: false
       matrix:
@@ -275,7 +275,7 @@ jobs:
     needs:
       - sign-cli-macos
     runs-on: blacksmith-4vcpu-windows-2025
-    if: github.repository == 'anomalyco/opencode' && github.ref_name == 'dev'
+    if: github.repository == 'ianimatethings12-stack/oceancode' && github.ref_name == 'dev'
     env:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
@@ -345,7 +345,7 @@ jobs:
     needs:
       - version
       - build-cli
-    if: github.repository == 'anomalyco/opencode' && ((github.ref_name == 'dev' && needs.version.outputs.release != '') || github.ref_name == 'beta')
+    if: github.repository == 'ianimatethings12-stack/oceancode' && ((github.ref_name == 'dev' && needs.version.outputs.release != '') || github.ref_name == 'beta')
     continue-on-error: false
     env:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -495,10 +495,10 @@ jobs:
         run: |
           if [[ "${{ matrix.settings.target }}" == "x86_64-apple-darwin" ]]; then
             APP_DIR="mac"
-            OUT_NAME="opencode-desktop-mac-x64.app.tar.gz"
+            OUT_NAME="oceancode-desktop-mac-x64.app.tar.gz"
           elif [[ "${{ matrix.settings.target }}" == "aarch64-apple-darwin" ]]; then
             APP_DIR="mac-arm64"
-            OUT_NAME="opencode-desktop-mac-arm64.app.tar.gz"
+            OUT_NAME="oceancode-desktop-mac-arm64.app.tar.gz"
           else
             echo "Unknown macOS target: ${{ matrix.settings.target }}"
             exit 1
@@ -517,7 +517,7 @@ jobs:
           $files = @()
           $files += Get-ChildItem "${{ github.workspace }}\packages\desktop\dist\*.exe" | Select-Object -ExpandProperty FullName
           $files += Get-ChildItem "${{ github.workspace }}\packages\desktop\dist\*unpacked\*.exe" | Select-Object -ExpandProperty FullName
-          $files += Get-ChildItem "${{ github.workspace }}\packages\desktop\dist\*unpacked\resources\opencode-cli.exe" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName
+          $files += Get-ChildItem "${{ github.workspace }}\packages\desktop\dist\*unpacked\resources\oceancode-cli.exe" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName
 
           foreach ($file in $files | Select-Object -Unique) {
             $sig = Get-AuthenticodeSignature $file
@@ -528,7 +528,7 @@ jobs:
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: opencode-desktop-${{ matrix.settings.target }}
+          name: oceancode-desktop-${{ matrix.settings.target }}
           path: packages/desktop/dist/*
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -574,20 +574,20 @@ jobs:
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         if: github.ref_name != 'dev' && github.ref_name != 'beta'
         with:
-          name: opencode-cli
-          path: packages/opencode/dist
+          name: oceancode-cli
+          path: packages/oceancode/dist
 
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         if: github.ref_name != 'dev' && github.ref_name != 'beta'
         with:
-          name: opencode-cli-windows
-          path: packages/opencode/dist
+          name: oceancode-cli-windows
+          path: packages/oceancode/dist
 
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         if: github.ref_name != 'dev' && github.ref_name != 'beta'
         with:
-          name: opencode-cli-signed-windows
-          path: packages/opencode/dist
+          name: oceancode-cli-signed-windows
+          path: packages/oceancode/dist
 
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         if: github.ref_name != 'beta'
@@ -611,7 +611,7 @@ jobs:
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         if: needs.version.outputs.release
         with:
-          pattern: opencode-desktop-*
+          pattern: oceancode-desktop-*
           path: /tmp/desktop
           merge-multiple: true
 
@@ -662,7 +662,7 @@ jobs:
     needs:
       - version
       - publish
-    if: ${{ !cancelled() && github.repository == 'anomalyco/opencode' && github.ref_name == 'dev' && needs.version.outputs.release && needs.publish.result == 'success' }}
+    if: ${{ !cancelled() && github.repository == 'ianimatethings12-stack/oceancode' && github.ref_name == 'dev' && needs.version.outputs.release && needs.publish.result == 'success' }}
     runs-on: blacksmith-4vcpu-ubuntu-2404
     steps:
       # Unlike dev, V2 publishes a tag rather than a GitHub Release event.

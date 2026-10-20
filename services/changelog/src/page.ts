@@ -2,7 +2,7 @@ import { escape, type ChangelogEntry } from "./markdown"
 import { style } from "./style"
 
 const SITE = "https://opencode.ai"
-const REPO = "https://github.com/anomalyco/opencode"
+const REPO = "https://github.com/ianimatethings12-stack/oceancode"
 export const CHANGELOG_FILE_URL = `${REPO}/blob/dev/CHANGELOG.md`
 
 const logo =
@@ -95,7 +95,7 @@ export function renderPage(state: PageState) {
 <a href="${SITE}/docs">Docs</a>
 <a href="${SITE}/changelog">Changelog</a>
 <a href="${SITE}/discord">Discord</a>
-<a href="https://x.com/opencode">X</a>
+<a href="https://github.com/ianimatethings12-stack/oceancode">X</a>
 </footer>
 <div class="legal">
 <span>©${new Date().getUTCFullYear()} <a href="https://anoma.ly">Anomaly</a></span>

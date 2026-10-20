@@ -501,7 +501,7 @@ describe("LocationServiceMap", () => {
         Effect.gen(function* () {
           yield* Effect.promise(() =>
             fs.writeFile(
-              path.join(dir.path, "opencode.json"),
+              path.join(dir.path, "oceancode.json"),
               JSON.stringify({ agents: { plan: { disabled: true } } }),
             ),
           )
@@ -530,7 +530,7 @@ describe("LocationServiceMap", () => {
           const location = Location.Ref.make({ directory: AbsolutePath.make(dir.path) })
           yield* Effect.promise(() =>
             fs.writeFile(
-              path.join(dir.path, "opencode.json"),
+              path.join(dir.path, "oceancode.json"),
               JSON.stringify({
                 providers: {
                   unavailable: {

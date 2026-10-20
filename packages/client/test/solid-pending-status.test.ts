@@ -8,7 +8,7 @@ const sessionID = "ses_pending"
 function fixture() {
   const listeners = new Set<Parameters<CreateDataInput["event"]["listen"]>[0]>()
   const api = OpenCode.make({
-    baseUrl: "http://opencode.local",
+    baseUrl: "http://oceancode.local",
     fetch: async (input, init) => {
       const request = input instanceof Request ? input : new Request(input, init)
       return request.method === "GET" ? Response.json({ data: [] }) : Response.json({ data: {} })

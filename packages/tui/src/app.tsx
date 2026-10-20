@@ -4,7 +4,7 @@ import { render, useRenderer, useTerminalDimensions } from "@opentui/solid"
 import "./component/spinner-renderable"
 import { Effect, Latch } from "effect"
 import { Service, type Endpoint } from "@opencode/client/effect/service"
-import { OpenCode, type SessionInfo } from "@opencode/client"
+import { OceanCode, type SessionInfo } from "@opencode/client"
 import { Global } from "@opencode/util/global"
 import { noTimeoutFetch } from "@opencode/util/no-timeout-fetch"
 import { ClipboardProvider, useClipboard } from "./context/clipboard"
@@ -217,7 +217,7 @@ export const run = Effect.fn("Tui.run")(function* (input: TuiInput) {
     headers: Service.headers(input.server.endpoint),
     fetch: noTimeoutFetch,
   }
-  const api = OpenCode.make(options)
+  const api = OceanCode.make(options)
   const location = yield* Effect.tryPromise(() => api.file.list({ location: { directory: process.cwd() } })).pipe(
     Effect.map((response) => response.location),
     Effect.catch(() => Effect.tryPromise(() => api.location.get())),
@@ -231,7 +231,7 @@ export const run = Effect.fn("Tui.run")(function* (input: TuiInput) {
         reconnect: async (signal: AbortSignal) => {
           const endpoint = await managed.reconnect(signal)
           const next = { baseUrl: endpoint.url, headers: Service.headers(endpoint), fetch: noTimeoutFetch }
-          return { api: OpenCode.make(next), url: endpoint.url }
+          return { api: OceanCode.make(next), url: endpoint.url }
         },
         restart: managed.restart,
       }
@@ -618,14 +618,14 @@ function App() {
     if (!terminalTitleEnabled()) return
 
     if (route.data.type === "home") {
-      setTerminalTitle(renderer, "OpenCode")
+      setTerminalTitle(renderer, "OceanCode")
       return
     }
 
     if (route.data.type === "session") {
       const title = session?.title
       if (!title || isFallbackTitle(title)) {
-        setTerminalTitle(renderer, "OpenCode")
+        setTerminalTitle(renderer, "OceanCode")
         return
       }
 
@@ -1031,7 +1031,7 @@ function App() {
         ? [
             {
               name: "opencode.update",
-              title: "Update OpenCode",
+              title: "Update OceanCode",
               slash: { name: "update" },
               run: () => updater.open?.("manual"),
               category: "System",
@@ -1137,7 +1137,7 @@ function App() {
         name: "docs.open",
         title: "Open docs",
         run: () => {
-          openUrl("https://opencode.ai/docs").catch(() => {})
+          openUrl("https://github.com/ianimatethings12-stack/oceancode/tree/dev/packages/web/src/content/docs").catch(() => {})
           dialog.clear()
         },
         category: "System",

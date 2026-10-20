@@ -10,7 +10,7 @@ describe("hasExistingAppState", () => {
     expect(hasExistingAppState([])).toBe(false)
     expect(hasExistingAppState([file("Local State"), directory("Crashpad")])).toBe(false)
     expect(hasExistingAppState([file("opencode.settings")])).toBe(true)
-    expect(hasExistingAppState([file("opencode.global.dat")])).toBe(true)
+    expect(hasExistingAppState([file("oceancode.global.dat")])).toBe(true)
     expect(hasExistingAppState([file("drafts.sqlite")])).toBe(true)
     expect(hasExistingAppState([file("window-state-abc.json")])).toBe(true)
     expect(hasExistingAppState([directory("opencode")])).toBe(true)

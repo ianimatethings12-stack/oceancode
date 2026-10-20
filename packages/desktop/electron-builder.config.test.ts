@@ -57,13 +57,13 @@ test.each(channels)("channel identity for $channel", ({ channel, appId }) => {
   for (const fpm of [config.deb?.fpm, config.rpm?.fpm]) {
     expect(fpm).toContainEqual(expect.stringContaining(`/usr/share/metainfo/${appId}.metainfo.xml`))
     expect(
-      fpm?.some((entry) => entry.endsWith("opencode-desktop.desktop=/usr/share/applications/opencode-desktop.desktop")),
+      fpm?.some((entry) => entry.endsWith("oceancode-desktop.desktop=/usr/share/applications/oceancode-desktop.desktop")),
     ).toBe(channel === "prod")
   }
 })
 
 test("legacy Linux launcher stays hidden", async () => {
-  const desktop = await Bun.file(path.join(import.meta.dirname, "resources/linux/opencode-desktop.desktop")).text()
+  const desktop = await Bun.file(path.join(import.meta.dirname, "resources/linux/oceancode-desktop.desktop")).text()
   expect(desktop).toContain("Exec=/opt/OpenCode/ai.opencode.desktop %U")
   expect(desktop).toContain("Icon=ai.opencode.desktop")
   expect(desktop).toContain("StartupWMClass=ai.opencode.desktop")
@@ -78,9 +78,9 @@ test("shared packaging defaults", async () => {
   const include = path.join(import.meta.dirname, "resources/windows/installer.nsh")
   expect(config.nsis?.include).toBe(include)
   expect(await Bun.file(include).exists()).toBe(true)
-  expect(config.files).toContain("!resources/opencode-cli*")
+  expect(config.files).toContain("!resources/oceancode-cli*")
   expect(config.extraResources).toEqual([
-    { from: "resources/", to: "", filter: ["opencode-cli", "opencode-cli.exe", "opencode-cli.version"] },
+    { from: "resources/", to: "", filter: ["oceancode-cli", "oceancode-cli.exe", "oceancode-cli.version"] },
   ])
 })
 

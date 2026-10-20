@@ -75,7 +75,7 @@ describe("Config.Entry", () => {
     const entries = [
       new Config.Document({
         type: "document",
-        path: AbsolutePath.make("/project/opencode.json"),
+        path: AbsolutePath.make("/project/oceancode.json"),
         info: new Config.Info({
           permissions: [
             { action: "shell", resource: "*", effect: "ask" },

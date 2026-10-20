@@ -611,7 +611,7 @@ export type MainStoreFrom =
   | {
       /** The key in the settings file, e.g. `ssh.servers`. */
       readonly settings: string
-      /** Another settings file of the desktop app, e.g. `opencode.updater`. Defaults to the app's settings file. */
+      /** Another settings file of the desktop app, e.g. `oceancode.updater`. Defaults to the app's settings file. */
       readonly file?: string
     }
   | {

@@ -1,0 +1,152 @@
+name: upstream-sync
+
+on:
+  schedule:
+    # 21:30 UTC = 3:00 AM IST (India Standard Time) every day
+    - cron: "30 21 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: upstream-sync
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Fetch Upstream Tags & Commits
+        run: |
+          git remote add upstream https://github.com/anomalyco/opencode.git || git remote set-url upstream https://github.com/anomalyco/opencode.git
+          git fetch upstream --tags
+
+      - name: Check for New Upstream Release
+        id: check_release
+        run: |
+          LATEST_TAG=$(git tag -l "v[0-9]*" --sort=-v:refname | head -n 1)
+          echo "Latest upstream tag: $LATEST_TAG"
+          echo "tag=$LATEST_TAG" >> "$GITHUB_OUTPUT"
+          
+          if git merge-base --is-ancestor "$LATEST_TAG" HEAD 2>/dev/null; then
+            echo "Current branch already contains $LATEST_TAG. Up to date!"
+            echo "needs_sync=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "New upstream release detected: $LATEST_TAG"
+            echo "needs_sync=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create Sync Branch and Merge Upstream
+        if: steps.check_release.outputs.needs_sync == 'true'
+        id: sync_branch
+        run: |
+          TAG="${{ steps.check_release.outputs.tag }}"
+          SYNC_BRANCH="sync/upstream-${TAG}"
+          echo "branch=$SYNC_BRANCH" >> "$GITHUB_OUTPUT"
+          
+          git checkout -b "$SYNC_BRANCH"
+          
+          if git merge "$TAG" -m "chore(sync): merge upstream $TAG" --allow-unrelated-histories; then
+            echo "merged=clean" >> "$GITHUB_OUTPUT"
+          else
+            echo "Merge had conflicts, will resolve with rebrand pipeline"
+            echo "merged=conflicts" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Apply OceanCode Rebrand Engine
+        if: steps.check_release.outputs.needs_sync == 'true'
+        run: |
+          bun install
+          bun script/rebrand.ts --apply
+          bun script/rebrand.ts --check --json || true
+
+      - name: Bump OceanCode Version (+0.0.1 up to .30 then next minor)
+        if: steps.check_release.outputs.needs_sync == 'true'
+        id: bump_version
+        run: |
+          NEW_VER=$(bun script/bump-version.ts)
+          echo "version=$NEW_VER" >> "$GITHUB_OUTPUT"
+          echo "Bumped OceanCode version to $NEW_VER"
+
+      - name: Run Typecheck
+        if: steps.check_release.outputs.needs_sync == 'true'
+        id: typecheck
+        run: |
+          if bun typecheck; then
+            echo "status=passed" >> "$GITHUB_OUTPUT"
+          else
+            echo "status=failed" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit Sync Branch Changes
+        if: steps.check_release.outputs.needs_sync == 'true'
+        run: |
+          TAG="${{ steps.check_release.outputs.tag }}"
+          VER="${{ steps.bump_version.outputs.version }}"
+          if [ -n "$(git status --porcelain)" ]; then
+            git add -A
+            git commit -m "chore(release): bump OceanCode to v${VER} (synced upstream ${TAG})"
+          fi
+
+      - name: Auto-Merge Directly to dev (Zero Human Action)
+        if: steps.check_release.outputs.needs_sync == 'true' && steps.typecheck.outputs.status == 'passed'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ steps.check_release.outputs.tag }}"
+          VER="${{ steps.bump_version.outputs.version }}"
+          SYNC_BRANCH="${{ steps.sync_branch.outputs.branch }}"
+          echo "Typecheck passed! Auto-merging $SYNC_BRANCH directly into dev..."
+          
+          git checkout dev
+          git merge "$SYNC_BRANCH" -m "feat(release): OceanCode v${VER} (synced upstream ${TAG})"
+          git push origin dev
+          echo "Successfully auto-merged and pushed OceanCode v${VER} to dev!"
+
+      - name: Open Fallback PR (Only If Typecheck Failed)
+        if: steps.check_release.outputs.needs_sync == 'true' && steps.typecheck.outputs.status != 'passed'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ steps.check_release.outputs.tag }}"
+          VER="${{ steps.bump_version.outputs.version }}"
+          SYNC_BRANCH="${{ steps.sync_branch.outputs.branch }}"
+          
+          git push origin "$SYNC_BRANCH" --force
+          
+          cat << 'EOF' > pr_body.md
+          ### Automated Daily Upstream Sync - Attention Required
+
+          Upstream release was pulled, rebranded, and bumped, but `bun typecheck` encountered compiler errors or breaking changes.
+
+          To protect `dev`, this release was **not** auto-merged.
+
+          Please review the sync branch, address the compiler errors, and merge when ready.
+          EOF
+          
+          EXISTING_PR=$(gh pr list --head "$SYNC_BRANCH" --json number -q '.[0].number' 2>/dev/null || true)
+          PR_TITLE="⚠️ [ACTION REQUIRED] OceanCode v${VER} sync (upstream ${TAG}) needs review"
+          
+          if [ -z "$EXISTING_PR" ]; then
+            gh pr create --title "$PR_TITLE" --body-file pr_body.md --head "$SYNC_BRANCH" --base dev
+          else
+            gh pr edit "$EXISTING_PR" --title "$PR_TITLE" --body-file pr_body.md
+          fi

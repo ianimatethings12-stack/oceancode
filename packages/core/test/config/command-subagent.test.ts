@@ -133,7 +133,7 @@ function project(
     const definition = { description: "Review code", template: "Review $ARGUMENTS: !`printf ready`", ...command }
     yield* Effect.promise(() =>
       Bun.write(
-        path.join(tmp.path, "opencode.json"),
+        path.join(tmp.path, "oceancode.json"),
         JSON.stringify({
           agents: { reviewer: { mode: "subagent", model: "test/child" } },
           ...(format === "markdown" ? {} : { commands: { review: definition } }),

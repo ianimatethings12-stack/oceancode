@@ -86,9 +86,9 @@ for (const id of ids) {
 
 const transaction = db.transaction(["documents", "blobs"], "readwrite")
 
-transaction.objectStore("documents").put(JSON.stringify({ entries: normal }), "opencode.global.dat:prompt-history")
+transaction.objectStore("documents").put(JSON.stringify({ entries: normal }), "oceancode.global.dat:prompt-history")
 
-transaction.objectStore("documents").put(JSON.stringify({ entries: shell }), "opencode.global.dat:prompt-history-shell")
+transaction.objectStore("documents").put(JSON.stringify({ entries: shell }), "oceancode.global.dat:prompt-history-shell")
 
 screenshots.forEach(({ id, blob }) => transaction.objectStore("blobs").put(blob, id))
 

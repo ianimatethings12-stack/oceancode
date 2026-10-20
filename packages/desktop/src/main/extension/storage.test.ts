@@ -162,8 +162,8 @@ describe("main extension storage", () => {
     },
     {
       name: "a key of another settings file",
-      from: { settings: "ready", file: "opencode.updater" },
-      seed: { settings: [{ file: "opencode.updater", key: "ready", value: [{ id: "u" }] }] },
+      from: { settings: "ready", file: "oceancode.updater" },
+      seed: { settings: [{ file: "oceancode.updater", key: "ready", value: [{ id: "u" }] }] },
       id: "u",
       row: '[{"id":"u"}]',
     },
@@ -228,6 +228,6 @@ function homes(state: StateStore, settings: SettingsFiles) {
   return [
     state.get("opencode.settings", "keepScreenActive"),
     settings().get("ssh.servers"),
-    settings("opencode.updater").get("ready"),
+    settings("oceancode.updater").get("ready"),
   ].filter((value) => value !== null && value !== undefined)
 }

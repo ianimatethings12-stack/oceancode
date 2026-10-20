@@ -59,7 +59,7 @@ describe("persist targets", () => {
   test("server global target preserves local key and isolates remote keys", () => {
     expect(Persist.serverGlobal(ServerScope.local, "notification")).toEqual(Persist.global("notification"))
     expect(Persist.serverGlobal("https://debian.example" as ServerScope, "notification")).toEqual({
-      storage: "opencode.global.dat",
+      storage: "oceancode.global.dat",
       key: "https://debian.example\0notification",
     })
   })

@@ -53,7 +53,7 @@ export async function create(options: CreateOptions = {}, embed: EmbeddedHost.Em
       embed,
     ),
   )
-  const client = OpenCode.make({ baseUrl: "http://opencode.local", fetch: host.fetch })
+  const client = OpenCode.make({ baseUrl: "http://oceancode.local", fetch: host.fetch })
   const register = async (plugin: Plugin.Plugin) => {
     const { PluginPromise } = await import("@opencode/core/plugin/promise")
     return host.runtime.runPromise(host.plugins.register(PluginPromise.fromPromise(plugin)))

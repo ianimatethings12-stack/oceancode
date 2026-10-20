@@ -18,11 +18,11 @@ const rootDir = path.resolve(packageDir, "../..")
 const signScript = path.join(rootDir, "script", "sign-windows.ps1")
 
 // The Electron 42 packaging update briefly installed Linux launchers/icons under
-// "opencode-desktop". Keep that hidden desktop entry around so existing GNOME/KDE
+// "oceancode-desktop". Keep that hidden desktop entry around so existing GNOME/KDE
 // pins still resolve after the canonical app id changes back to ai.opencode.desktop.
-const legacyDesktopEntry = path.join(packageDir, "resources", "linux", "opencode-desktop.desktop")
+const legacyDesktopEntry = path.join(packageDir, "resources", "linux", "oceancode-desktop.desktop")
 
-const legacyDesktopEntryFpm = `${legacyDesktopEntry}=/usr/share/applications/opencode-desktop.desktop`
+const legacyDesktopEntryFpm = `${legacyDesktopEntry}=/usr/share/applications/oceancode-desktop.desktop`
 
 const metainfoFpm = (appId: string) =>
   `${path.join(packageDir, "resources", `${appId}.metainfo.xml`)}=/usr/share/metainfo/${appId}.metainfo.xml`
@@ -45,7 +45,7 @@ function macSignOptions(options: CustomMacSignOptions): CustomMacSignOptions {
     optionsForFile: (file) => {
       const defaults = options.optionsForFile?.(file)
 
-      if (file !== path.join(options.app, "Contents/Resources/opencode-cli")) return defaults ?? {}
+      if (file !== path.join(options.app, "Contents/Resources/oceancode-cli")) return defaults ?? {}
 
       // The Bun CLI loads bun-pty's native library; Electron and its helpers do not need this exception.
       return { ...defaults, entitlements: path.join(packageDir, "resources/entitlements.cli.plist") }
@@ -73,7 +73,7 @@ const getBase = (appId: string): Configuration => {
   const target = getCurrentCli()
 
   return {
-    artifactName: "opencode-desktop-${os}-${arch}.${ext}",
+    artifactName: "oceancode-desktop-${os}-${arch}.${ext}",
     directories: {
       output: "dist",
       buildResources: "resources",
@@ -89,7 +89,7 @@ const getBase = (appId: string): Configuration => {
     files: [
       "out/**/*",
       "resources/**/*",
-      "!resources/opencode-cli*",
+      "!resources/oceancode-cli*",
       // Keep only the target platform's node-pty prebuild when cross-packaging with --cpu=*.
       ...CLI_BINARIES.filter((item) => item.os !== target.os || item.cpu !== target.cpu).map(
         (item) => `!**/node_modules/@lydell/node-pty-${item.os}-${item.cpu}{,/**/*}`,
@@ -113,7 +113,7 @@ const getBase = (appId: string): Configuration => {
       {
         from: "resources/",
         to: "",
-        filter: ["opencode-cli", "opencode-cli.exe", "opencode-cli.version"],
+        filter: ["oceancode-cli", "oceancode-cli.exe", "oceancode-cli.version"],
       },
     ],
     afterPack: async (context) => {
@@ -124,13 +124,13 @@ const getBase = (appId: string): Configuration => {
 
       if (arch !== target.cpu) throw new Error(`Packaging ${arch} Electron with the ${target.target} CLI`)
       const resources = context.packager.getResourcesDir(context.appOutDir)
-      const cli = path.join(resources, context.electronPlatformName === "win32" ? "opencode-cli.exe" : "opencode-cli")
+      const cli = path.join(resources, context.electronPlatformName === "win32" ? "oceancode-cli.exe" : "oceancode-cli")
 
       const file = await stat(cli)
 
       if (!file.isFile() || file.size === 0) throw new Error(`Bundled CLI must be a non-empty file: ${cli}`)
       await NativeArch.verify(cli, arch)
-      const version = path.join(path.dirname(cli), "opencode-cli.version")
+      const version = path.join(path.dirname(cli), "oceancode-cli.version")
 
       if ((await stat(version)).size === 0) throw new Error(`Bundled CLI version must be a non-empty file: ${version}`)
 

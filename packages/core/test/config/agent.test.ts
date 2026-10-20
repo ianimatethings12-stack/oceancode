@@ -623,7 +623,7 @@ Use native v2 fields.`,
           )
 
           yield* configTest.emitChange({ type: "create", path: path.join(tmp.path, "commands", "review.md") })
-          yield* configTest.emitChange({ type: "update", path: path.join(tmp.path, "opencode.json") })
+          yield* configTest.emitChange({ type: "update", path: path.join(tmp.path, "oceancode.json") })
           yield* drain
           expect(reloads).toBe(0)
 

@@ -52,7 +52,7 @@ it.live(
         .pipe(HttpEffect.toWebHandlerWith(context))
       const request = (method: "GET" | "POST", route: string) =>
         Effect.promise((signal) => {
-          const url = new URL(route, "http://opencode.local")
+          const url = new URL(route, "http://oceancode.local")
           url.searchParams.set("location[directory]", tmp.path)
           return handler(
             new Request(url, {

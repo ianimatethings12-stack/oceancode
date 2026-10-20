@@ -127,7 +127,7 @@ function enqueued(sessionID: string, inboxID = "msg_pending"): OpenCodeEvent {
 function fixture(read?: (url: URL) => Promise<Response | void>) {
   const listeners = new Set<Parameters<CreateDataInput["event"]["listen"]>[0]>()
   const api = OpenCode.make({
-    baseUrl: "http://opencode.local",
+    baseUrl: "http://oceancode.local",
     fetch: async (input) => {
       const url = new URL(input instanceof Request ? input.url : String(input))
       const response = await read?.(url)

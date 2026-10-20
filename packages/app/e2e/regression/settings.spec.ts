@@ -13,7 +13,7 @@ const sandboxes = Array.from({ length: 12 }, (_, index) => `${directory}/workspa
 const override =
   "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect width='16' height='16' fill='red'/%3E%3C/svg%3E"
 
-const contributors = "https://api.github.com/repos/anomalyco/opencode/contributors?anon=1&per_page=1"
+const contributors = "https://api.github.com/repos/ianimatethings12-stack/oceancode/contributors?anon=1&per_page=1"
 
 test.use({ serviceWorkers: "block" })
 
@@ -25,7 +25,7 @@ function open(page: Page, input: Partial<WorkspaceInput> = {}) {
     project: { icon: { color: "orange", override }, commands: { start: "echo setup" }, sandboxes },
     provider: NO_PROVIDER,
     configEntries: [
-      { type: "document", path: "/home/test/.config/opencode/opencode.jsonc", info: { shell: "/bin/zsh" } },
+      { type: "document", path: "/home/test/.config/opencode/oceancode.jsonc", info: { shell: "/bin/zsh" } },
       { type: "directory", path: "/home/test/.config/opencode" },
     ],
     shells: [
@@ -667,12 +667,12 @@ test.describe("worktrees prefetch", () => {
 const lsp: ConfigEntry[] = [
   {
     type: "document",
-    path: "/config/opencode.json",
+    path: "/config/oceancode.json",
     info: { lsp: { typescript: { command: ["typescript-language-server", "--stdio"], extensions: [".ts", ".tsx"] } } },
   },
   {
     type: "document",
-    path: `${directory}/opencode.jsonc`,
+    path: `${directory}/oceancode.jsonc`,
     info: { lsp: { typescript: { disabled: true }, rust: { command: ["rust-analyzer"], extensions: [".rs"] } } },
   },
 ]
@@ -1360,7 +1360,7 @@ for (const viewport of [
   { name: "mobile", width: 390, height: 844, bottom: true },
 ]) {
   test(`settings layout (${viewport.name}): every page scrolls inside its panel with room below`, async ({ page }) => {
-    await page.route("https://api.github.com/repos/anomalyco/opencode/contributors?*", (route) =>
+    await page.route("https://api.github.com/repos/ianimatethings12-stack/oceancode/contributors?*", (route) =>
       route.fulfill({ json: [] }),
     )
     const { settings } = await open(page)

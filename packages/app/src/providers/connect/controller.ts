@@ -408,7 +408,7 @@ export function createProviderConnectionController(options: {
       .then((response) => {
         if (isConsole() && platform.platform === "desktop") {
           const url = new URL(response.data.url)
-          url.searchParams.set("client_id", "opencode-desktop")
+          url.searchParams.set("client_id", "oceancode-desktop")
           // Lets the Console return link focus the window that started the sign-in.
           url.searchParams.set("return_window", platform.windowID)
           response.data.url = url.href

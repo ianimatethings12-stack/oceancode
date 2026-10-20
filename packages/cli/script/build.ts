@@ -214,7 +214,7 @@ export default { path: file, version: ${JSON.stringify(opencodePty.version)}, sh
         name: `@opencode/${name}`,
         version: Script.version,
         license: "MIT",
-        repository: { type: "git", url: "git+https://github.com/anomalyco/opencode.git" },
+        repository: { type: "git", url: "git+https://github.com/ianimatethings12-stack/oceancode.git" },
         os: [item.os],
         cpu: [item.arch],
       },

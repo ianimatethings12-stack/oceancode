@@ -34,7 +34,7 @@ export type WindowSnapshot = {
 // runs so the first render already has them; mirrors windowStorage() in
 // packages/app/src/runtime/persistence/storage.ts.
 export function storageSnapshotNames(windowID: string) {
-  return ["opencode.global.dat", "default.dat", windowDataFile(windowID)]
+  return ["oceancode.global.dat", "default.dat", windowDataFile(windowID)]
 }
 
 export function windowDataFile(id: string) {

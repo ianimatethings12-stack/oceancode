@@ -175,7 +175,7 @@ const miniflare = new Miniflare({
 })
 
 try {
-  const response = await miniflare.dispatchFetch("http://opencode.local/health")
+  const response = await miniflare.dispatchFetch("http://oceancode.local/health")
   if (response.status !== 200) throw new Error(
     "Packed workerd health returned " + response.status + ": " + await response.text(),
   )

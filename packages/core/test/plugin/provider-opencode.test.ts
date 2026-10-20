@@ -66,7 +66,7 @@ function consoleServer(orgID: string | null | undefined, unavailable = false) {
       requests.push(path)
       agents.push(request.headers.get("user-agent"))
       if (path === "/auth/device/code") {
-        expect(await request.json()).toEqual({ client_id: "opencode-cli", supports_org_scope: true })
+        expect(await request.json()).toEqual({ client_id: "oceancode-cli", supports_org_scope: true })
         return Response.json({
           device_code: "device",
           user_code: "user",
@@ -161,7 +161,7 @@ describe("OpencodePlugin", () => {
               return Response.json({
                 device_code: "device",
                 user_code: "user",
-                verification_uri_complete: "/console/device?user_code=user&client_id=opencode-cli",
+                verification_uri_complete: "/console/device?user_code=user&client_id=oceancode-cli",
                 expires_in: 60,
                 interval: 0,
               })
@@ -186,7 +186,7 @@ describe("OpencodePlugin", () => {
             methodID: Integration.MethodID.make("device"),
             answer: { server: `${server.url.origin}/console///?ignored=true#ignored` },
           })
-          expect(attempt.url).toBe(`${server.url.origin}/console/device?user_code=user&client_id=opencode-cli`)
+          expect(attempt.url).toBe(`${server.url.origin}/console/device?user_code=user&client_id=oceancode-cli`)
           yield* eventually(
             integrations.oauth.status({ integrationID, attemptID: attempt.attemptID }),
             (status) => status.status === "complete",
@@ -1432,7 +1432,7 @@ describe("OpencodePlugin", () => {
                 providerID: state.providerID,
                 results: [
                   {
-                    url: "https://github.com/anomalyco/opencode",
+                    url: "https://github.com/ianimatethings12-stack/oceancode",
                     title: "OpenCode",
                     content: "Open source AI coding agent.",
                     time: { published: 1_700_000_000_000 },
@@ -1474,7 +1474,7 @@ describe("OpencodePlugin", () => {
               providerID: WebSearch.ID.make("opencode"),
               results: [
                 {
-                  url: "https://github.com/anomalyco/opencode",
+                  url: "https://github.com/ianimatethings12-stack/oceancode",
                   title: "OpenCode",
                   content: "Open source AI coding agent.",
                   time: { published: 1_700_000_000_000 },

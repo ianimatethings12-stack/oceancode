@@ -7,7 +7,7 @@ test("publishes an initial message page, its index, and its cursor together", as
   const observed: { ids: string[]; more: boolean; text: string | undefined }[] = []
 
   const api = OpenCode.make({
-    baseUrl: "http://opencode.local",
+    baseUrl: "http://oceancode.local",
     fetch: async () =>
       Response.json({
         data: [{ id: "msg_page", type: "user", text: "History", time: { created: 1 } }],

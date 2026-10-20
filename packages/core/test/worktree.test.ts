@@ -332,7 +332,7 @@ describe("Worktree", () => {
       yield* config.setEntries([
         new Document({
           type: "document",
-          path: abs(path.join(root.path, "global/opencode.json")),
+          path: abs(path.join(root.path, "global/oceancode.json")),
           info: new Info({ worktree: { directory: ".lane/trees" } }),
         }),
       ])
@@ -898,12 +898,12 @@ describe("Worktree", () => {
       const documents = [
         new Document({
           type: "document",
-          path: abs(path.join(input.root.path, "opencode.json")),
+          path: abs(path.join(input.root.path, "oceancode.json")),
           info: new Info({ worktree: { directory: "outer" } }),
         }),
         new Document({
           type: "document",
-          path: abs(path.join(input.root.path, "nested/opencode.json")),
+          path: abs(path.join(input.root.path, "nested/oceancode.json")),
           info: new Info({ worktree: { directory: "copies" } }),
         }),
       ]
@@ -954,7 +954,7 @@ describe("Worktree", () => {
         yield* config.setEntries([
           new Document({
             type: "document",
-            path: abs(path.join(home, ".config/opencode/opencode.json")),
+            path: abs(path.join(home, ".config/opencode/oceancode.json")),
             info: new Info({ worktree: { directory } }),
           }),
         ])

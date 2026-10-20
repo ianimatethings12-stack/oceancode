@@ -142,13 +142,13 @@ describe("schema-backed persistence", () => {
       await root.state[3].promise
       expect(root.state[0]).toEqual({ enabled: true, label: "desktop" })
       expect(storage.values.has("undefined:old-schema")).toBe(false)
-      expect(JSON.parse(storage.values.get("opencode.global.dat:schema-desktop")!)).toEqual({
+      expect(JSON.parse(storage.values.get("oceancode.global.dat:schema-desktop")!)).toEqual({
         enabled: true,
         label: "desktop",
       })
       root.state[1]("label", "changed")
       flushPersisted()
-      expect(JSON.parse(storage.values.get("opencode.global.dat:schema-desktop")!)).toEqual({
+      expect(JSON.parse(storage.values.get("oceancode.global.dat:schema-desktop")!)).toEqual({
         enabled: true,
         label: "changed",
       })

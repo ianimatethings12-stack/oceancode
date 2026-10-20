@@ -38,8 +38,8 @@ it.live("uses base configuration without depending on process.cwd()", () =>
     yield* Effect.promise(() => Promise.all([fs.mkdir(global), fs.mkdir(project)]))
     yield* Effect.promise(() =>
       Promise.all([
-        fs.writeFile(path.join(global, "opencode.json"), JSON.stringify({ model: "base/default" })),
-        fs.writeFile(path.join(project, "opencode.json"), JSON.stringify({ model: "project/default" })),
+        fs.writeFile(path.join(global, "oceancode.json"), JSON.stringify({ model: "base/default" })),
+        fs.writeFile(path.join(project, "oceancode.json"), JSON.stringify({ model: "project/default" })),
       ]),
     )
     const handler = yield* ServerFetch.make(
@@ -53,11 +53,11 @@ it.live("uses base configuration without depending on process.cwd()", () =>
     )
 
     expect(global).not.toBe(process.cwd())
-    expect(yield* request(handler, new URL("http://opencode.local/api/experimental/generate"))).toEqual({
+    expect(yield* request(handler, new URL("http://oceancode.local/api/experimental/generate"))).toEqual({
       model: { providerID: "base", model: "default" },
     })
 
-    const legacy = new URL("http://opencode.local/api/experimental/generate")
+    const legacy = new URL("http://oceancode.local/api/experimental/generate")
     legacy.searchParams.set("location[directory]", project)
     expect(yield* request(handler, legacy)).toEqual({
       model: { providerID: "base", model: "default" },

@@ -19,7 +19,7 @@ import { Mcp } from "@opencode/schema/mcp"
 import { Money } from "@opencode/schema/money"
 
 const defaultServer = "https://opencode.ai/console"
-const clientID = "opencode-cli"
+const clientID = "oceancode-cli"
 const methodID = Integration.MethodID.make("device")
 // Drop statements whose action or effect is a value this version does not know, so a newer Console can
 // extend either enum. Malformed statements still fail validation.

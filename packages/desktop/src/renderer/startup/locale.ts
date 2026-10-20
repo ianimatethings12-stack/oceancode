@@ -8,7 +8,7 @@ import { storedLocaleValue } from "./locale-value"
 const cacheKey = "opencode.desktop.language"
 
 export async function preloadStoredLocale(platform: Platform) {
-  const fresh = Promise.resolve(platform.storage?.("opencode.global.dat").getItem("language")).then(
+  const fresh = Promise.resolve(platform.storage?.("oceancode.global.dat").getItem("language")).then(
     (raw) => {
       localStorage.setItem(cacheKey, raw ?? "")
 

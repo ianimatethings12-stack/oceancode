@@ -41,7 +41,7 @@ export const create: <R = never>(
 >(options: CreateOptions<R> = {}, embed: EmbedOptions = {}) {
   const host = yield* Effect.acquireRelease(EmbeddedHost.create(options, embed), (host) => Effect.promise(host.close))
   const httpClient = yield* HttpClient.HttpClient.pipe(Effect.provide(FetchHttpClient.layer))
-  const client = yield* OpenCode.make({ baseUrl: "http://opencode.local" }).pipe(
+  const client = yield* OpenCode.make({ baseUrl: "http://oceancode.local" }).pipe(
     Effect.provideService(
       HttpClient.HttpClient,
       // FetchHttpClient reads Fetch at request time; callers must not replace this host's in-process transport.

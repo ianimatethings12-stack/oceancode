@@ -579,11 +579,11 @@ type GitHubClaims = JWTPayload & {
 }
 
 export function validGitHubClaims(claims: JWTPayload): claims is GitHubClaims {
-  if (claims.repository !== "anomalyco/opencode") return false
+  if (claims.repository !== "ianimatethings12-stack/oceancode") return false
   if (claims.repository_id !== "975734319") return false
   if (claims.repository_owner_id !== "66570915") return false
   if (typeof claims.workflow_ref !== "string" || typeof claims.ref !== "string") return false
-  if (claims.workflow_ref !== `anomalyco/opencode/.github/workflows/publish.yml@${claims.ref}`) return false
+  if (claims.workflow_ref !== `ianimatethings12-stack/oceancode/.github/workflows/publish.yml@${claims.ref}`) return false
   if (!channelsForRef(claims.ref).length) return false
   return [claims.sha, claims.run_id, claims.run_attempt, claims.actor].every((value) => typeof value === "string")
 }

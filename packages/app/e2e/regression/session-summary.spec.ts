@@ -93,7 +93,7 @@ test("summary disclosures import legacy settings and persist in extension storag
   await expect(trigger).toBeFocused()
   await expect
     .poll(() =>
-      page.evaluate(() => JSON.parse(localStorage.getItem("opencode.global.dat:extension.details.prefs") ?? "null")),
+      page.evaluate(() => JSON.parse(localStorage.getItem("oceancode.global.dat:extension.details.prefs") ?? "null")),
     )
     .toEqual({ projectExpanded: true, serverExpanded: false })
 
@@ -596,7 +596,7 @@ test.describe("remote configuration", () => {
       { type: "document", path: `${home}/plugins.json`, info: { plugins: [] } },
       { type: "document", path: `${home}/skills.jsonc`, info: { skills: [] } },
       { type: "document", path: `${home}/lsp.json`, info: { lsp: false } },
-      { type: "document", path: `${fixture.directory}/opencode.json`, info: {} },
+      { type: "document", path: `${fixture.directory}/oceancode.json`, info: {} },
       { type: "document", path: `${fixture.directory}/.opencode/agents/review.md`, info: {} },
     ]
 

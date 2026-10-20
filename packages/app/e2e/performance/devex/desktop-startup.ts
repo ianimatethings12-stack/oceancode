@@ -156,7 +156,7 @@ async function createColdProfile() {
       rm(join(repository, path), { recursive: true, force: true }),
     ),
   )
-  const root = await mkdtemp(join(tmpdir(), "opencode-desktop-startup-"))
+  const root = await mkdtemp(join(tmpdir(), "oceancode-desktop-startup-"))
 
   return initializeColdProfile(root).catch(async (error) => {
     await rm(root, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 })
@@ -172,7 +172,7 @@ async function initializeColdProfile(root: string) {
   )
   await Promise.all([
     writeFile(join(root, "desktop", "opencode.settings"), JSON.stringify({ firstLaunchOnboardingComplete: true })),
-    writeFile(join(root, "desktop", "opencode.global.dat"), JSON.stringify({ language: '{"locale":"en"}' })),
+    writeFile(join(root, "desktop", "oceancode.global.dat"), JSON.stringify({ language: '{"locale":"en"}' })),
   ])
   const registration = join(root, "desktop", "opencode", "service-local.json")
   await Service.stop({ file: registration })

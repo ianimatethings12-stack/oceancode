@@ -42,7 +42,7 @@ const packages = [
     identifier: "Anomaly.OpenCode.Desktop",
     // Matches the display name the installer registers with Windows, without its version suffix.
     name: "OpenCode",
-    moniker: "opencode-desktop",
+    moniker: "oceancode-desktop",
     description: "The open source AI coding agent as a desktop app.",
     installer: [
       "InstallerType: nullsoft",
@@ -54,8 +54,8 @@ const packages = [
       "- opencode",
     ],
     files: [
-      { architecture: "x64", file: path.join(desktop, "opencode-desktop-win-x64.exe") },
-      { architecture: "arm64", file: path.join(desktop, "opencode-desktop-win-arm64.exe") },
+      { architecture: "x64", file: path.join(desktop, "oceancode-desktop-win-x64.exe") },
+      { architecture: "arm64", file: path.join(desktop, "oceancode-desktop-win-arm64.exe") },
     ],
   },
 ]
@@ -108,12 +108,12 @@ async function prepare(input: (typeof packages)[number]) {
       // Matches the publisher the desktop installer registers with Windows.
       "Publisher: OpenCode",
       "PublisherUrl: https://anoma.ly/",
-      "PublisherSupportUrl: https://github.com/anomalyco/opencode/issues",
+      "PublisherSupportUrl: https://github.com/ianimatethings12-stack/oceancode/issues",
       "PrivacyUrl: https://opencode.ai/legal/privacy-policy",
       `PackageName: ${input.name}`,
       "PackageUrl: https://opencode.ai/",
       "License: MIT",
-      "LicenseUrl: https://github.com/anomalyco/opencode/blob/HEAD/LICENSE",
+      "LicenseUrl: https://github.com/ianimatethings12-stack/oceancode/blob/HEAD/LICENSE",
       `ShortDescription: ${input.description}`,
       `Moniker: ${input.moniker}`,
       "Tags:",
@@ -122,7 +122,7 @@ async function prepare(input: (typeof packages)[number]) {
       "- developer-tools",
       "Documentations:",
       "- DocumentLabel: Docs",
-      "  DocumentUrl: https://opencode.ai/docs/",
+      "  DocumentUrl: https://github.com/ianimatethings12-stack/oceancode/tree/dev/packages/web/src/content/docs/",
       ...footer("defaultLocale"),
     ],
   }
@@ -198,7 +198,7 @@ async function submit(input: Awaited<ReturnType<typeof prepare>>) {
         title,
         head: `${fork.owner.login}:${branch}`,
         base: "master",
-        body: `Published by the [OpenCode](https://github.com/anomalyco/opencode) release workflow${run ? ` in ${run}` : ""}.`,
+        body: `Published by the [OpenCode](https://github.com/ianimatethings12-stack/oceancode) release workflow${run ? ` in ${run}` : ""}.`,
       },
     }),
   )

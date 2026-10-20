@@ -47,7 +47,7 @@ export async function createAcpFixture(
     readonly respond?: (request: unknown) => string | Response | Promise<string | Response>
   } = {},
 ) {
-  const root = await fs.mkdtemp(path.join(os.tmpdir(), "opencode-cli-acp-"))
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), "oceancode-cli-acp-"))
   const home = path.join(root, "workspace")
   const config = path.join(root, "config")
   const models = path.join(root, "models.json")
@@ -70,7 +70,7 @@ export async function createAcpFixture(
       })
     },
   })
-  await Bun.write(path.join(config, "opencode.json"), JSON.stringify(verifierConfig(`http://127.0.0.1:${llm.port}/v1`)))
+  await Bun.write(path.join(config, "oceancode.json"), JSON.stringify(verifierConfig(`http://127.0.0.1:${llm.port}/v1`)))
   await Bun.write(models, "{}")
 
   const processes = new Set<AcpProcess>()

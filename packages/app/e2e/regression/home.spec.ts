@@ -178,7 +178,7 @@ test("a server whose saved password changes works with the new password", async 
   // Saved with the password the server accepts until the test changes it.
   await seed(page, {
     storage: {
-      "opencode.global.dat:server": {
+      "oceancode.global.dat:server": {
         list: [{ type: "http", displayName: "Remote", http: { url: REMOTE_SERVER, password: "old-password" } }],
       },
     },

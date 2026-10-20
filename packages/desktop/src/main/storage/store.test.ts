@@ -20,7 +20,7 @@ describe("settings store", () => {
   })
 
   test("starts empty without a file, creates it on the first write, and refuses undefined", () => {
-    const file = path.join(dir(), "nested", "opencode.updater")
+    const file = path.join(dir(), "nested", "oceancode.updater")
     const store = createSettingsStore(file)
     expect(store.get("ready")).toBeUndefined()
     expect(existsSync(file)).toBe(false)

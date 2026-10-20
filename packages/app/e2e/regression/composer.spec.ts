@@ -21,7 +21,7 @@ test("a catalog refresh cannot replace an existing session's model", async ({ pa
     sessions: [{ id: sessionID, agent: "build", model: { id: "alpha", providerID: "opencode", variant: "high" } }],
     provider: () => catalog.current,
     onPrompt: (input) => void prompts.push(input.body),
-    seed: { storage: { "opencode.global.dat:model": { recent: [{ providerID: "opencode", modelID: "beta" }] } } },
+    seed: { storage: { "oceancode.global.dat:model": { recent: [{ providerID: "opencode", modelID: "beta" }] } } },
   })
 
   const control = page.locator('[data-action="composer-model"]')
@@ -429,7 +429,7 @@ test("marks a Console provider with its workspace only when it is also connected
     },
     seed: {
       storage: {
-        "opencode.global.dat:model": {
+        "oceancode.global.dat:model": {
           user: [
             ["opencode", "console-model"],
             ["console-google", "managed-gemini"],

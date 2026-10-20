@@ -162,7 +162,7 @@ const make = Effect.gen(function* () {
   const installedWinget = /[\\/]winget[\\/]packages[\\/]anomaly\.opencode_/i.test(executable)
 
   const readPolicy = Effect.fnUntraced(function* () {
-    const values = yield* Effect.forEach(["config.json", "opencode.json", "opencode.jsonc"], (name) =>
+    const values = yield* Effect.forEach(["config.json", "oceancode.json", "oceancode.jsonc"], (name) =>
       fs.readFileString(path.join(global.config, name)).pipe(
         Effect.map(decodePolicy),
         Effect.orElseSucceed(() => undefined),
@@ -280,7 +280,7 @@ const make = Effect.gen(function* () {
       try: (signal) =>
         fetch(
           core
-            ? "https://formulae.brew.sh/api/formula/opencode.json"
+            ? "https://formulae.brew.sh/api/formula/oceancode.json"
             : `https://opencode.ai/update/api/${encodeURIComponent(channel)}/${encodeURIComponent(OPENCODE_ARTIFACT)}/${distribution}?current=${encodeURIComponent(OPENCODE_VERSION)}`,
           {
             signal: AbortSignal.any([signal, AbortSignal.timeout(10_000)]),

@@ -273,7 +273,7 @@ it.live("install failures expose stderr and process errors do not report success
               : "@opencode/cli@2.3.4"
             : command.command === "vp"
               ? "[]"
-              : "opencode-ai@1.0.0",
+              : "oceancode@1.0.0",
         ),
       }))
       expect(yield* test.updater.method()).toBe(method)
@@ -311,7 +311,7 @@ it.live("vp detection ignores no-match output that repeats the package name", ()
 
 it.live("Homebrew Core installs check and upgrade the Core formula", () =>
   Effect.gen(function* () {
-    const test = yield* fixture(() => ({}), "@opencode/cli", false, "anomalyco/tap/opencode-v2", "opencode")
+    const test = yield* fixture(() => ({}), "@opencode/cli", false, "ianimatethings12-stack/oceancode-v2", "opencode")
     expect(yield* test.updater.method()).toBe("brew")
     expect(yield* test.updater.latest()).toBe("2.0.21")
     yield* test.updater.upgrade("brew", "2.0.21")
@@ -319,7 +319,7 @@ it.live("Homebrew Core installs check and upgrade the Core formula", () =>
     // An explicitly selected method keeps its own release source.
     expect(yield* test.updater.latest("npm")).toBe("2.3.4")
     expect(test.requests).toEqual([
-      "https://formulae.brew.sh/api/formula/opencode.json",
+      "https://formulae.brew.sh/api/formula/oceancode.json",
       "https://opencode.ai/update/api/local/cli/npm?current=local",
     ])
   }),

@@ -41,7 +41,7 @@ const setup = Effect.gen(function* () {
     fs: { filewatcher: false },
   })
   const api = OpenCode.make({
-    baseUrl: "http://opencode.local",
+    baseUrl: "http://oceancode.local",
     fetch: Object.assign((input: string | URL | Request, init?: RequestInit) => handler(new Request(input, init)), {
       preconnect: fetch.preconnect,
     }),
@@ -95,7 +95,7 @@ it.live("rejects unknown message type filters at the HTTP boundary", () =>
     yield* Effect.promise(async () => {
       for (const type of ["unknown", "tool", "User", ""]) {
         const response = await fixture.handler(
-          new Request(`http://opencode.local/api/session/${fixture.sessionID}/message?type=${type}`),
+          new Request(`http://oceancode.local/api/session/${fixture.sessionID}/message?type=${type}`),
         )
         expect(response.status).toBe(400)
         expect(await response.json()).toMatchObject({ _tag: "InvalidRequestError" })

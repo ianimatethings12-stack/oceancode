@@ -17,7 +17,7 @@ const makeRequest = Effect.fn(function* () {
   return (path: string, method: string, body?: unknown) =>
     Effect.promise(async () => {
       const response = await handler(
-        new Request(`http://opencode.local${path}`, {
+        new Request(`http://oceancode.local${path}`, {
           method,
           headers: { "content-type": "application/json" },
           body: body === undefined ? undefined : JSON.stringify(body),

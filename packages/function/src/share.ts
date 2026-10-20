@@ -150,9 +150,9 @@ const page = `<!doctype html>
       </header>
       <nav>
         <a href="https://opencode.ai">Home</a>
-        <a href="https://opencode.ai/docs">Docs</a>
-        <a href="https://github.com/anomalyco/opencode">GitHub</a>
-        <a href="https://opencode.ai/discord">Discord</a>
+        <a href="https://github.com/ianimatethings12-stack/oceancode/tree/dev/packages/web/src/content/docs">Docs</a>
+        <a href="https://github.com/ianimatethings12-stack/oceancode">GitHub</a>
+        <a href="https://github.com/ianimatethings12-stack/oceancode/discussions">Discord</a>
       </nav>
     </main>
   </body>

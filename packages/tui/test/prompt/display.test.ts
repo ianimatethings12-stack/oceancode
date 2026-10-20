@@ -47,7 +47,7 @@ describe("prompt display", () => {
       "\0@x",
       "Review /api design",
       "Review /tmp/file.ts",
-      "https://opencode.ai/docs",
+      "https://github.com/ianimatethings12-stack/oceancode/tree/dev/packages/web/src/content/docs",
       "\0/x",
     ]
     expect(

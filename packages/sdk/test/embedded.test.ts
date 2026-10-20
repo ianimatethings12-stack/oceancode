@@ -435,13 +435,13 @@ it.live("configures workspace providers through the SDK facade", () =>
       })
       const opencode = yield* fixture.sdk.OpenCode.create({ workspaceProviders: { fake: driver } })
       const requestedID = fixture.sdk.Workspace.ID.create()
-      const workspaceID = yield* opencode.workspace.create({ id: requestedID, provider: "fake" })
+      const workspaceID = yield* oceancode.workspace.create({ id: requestedID, provider: "fake" })
 
       expect(workspaceID).toBe(requestedID)
-      expect(yield* opencode.workspace.create({ id: requestedID, provider: "fake" })).toBe(requestedID)
+      expect(yield* oceancode.workspace.create({ id: requestedID, provider: "fake" })).toBe(requestedID)
       expect(calls).toEqual([])
 
-      const workspace = yield* opencode.workspace.provision({ workspaceID })
+      const workspace = yield* oceancode.workspace.provision({ workspaceID })
 
       expect(workspace.provider).toBe("fake")
       expect(workspace.binding).toEqual({ externalID: workspace.id })
@@ -454,9 +454,9 @@ it.live("configures workspace providers through the SDK facade", () =>
       const session = yield* opencode.sessions.create({ location: workspaceLocation })
       expect(session.location.workspaceID).toBe(workspace.id)
 
-      expect(yield* opencode.workspace.destroy({ workspaceID: workspace.id })).toEqual({ destroyed: true })
+      expect(yield* oceancode.workspace.destroy({ workspaceID: workspace.id })).toEqual({ destroyed: true })
       expect(calls.map((call) => call.operation)).toEqual(["create", "destroy"])
-      expect(yield* opencode.workspace.destroy({ workspaceID: workspace.id })).toEqual({ destroyed: false })
+      expect(yield* oceancode.workspace.destroy({ workspaceID: workspace.id })).toEqual({ destroyed: false })
       expect(calls.map((call) => call.operation)).toEqual(["create", "destroy"])
     }),
   ),
@@ -513,10 +513,10 @@ const workspaceModelScenario = (fixture: Fixture, policy: "eager" | "lazy") =>
         overrides: [llmClient.replace(client), SessionRunnerModel.node.replace(models)],
       },
     )
-    const workspaceID = yield* opencode.workspace.create({ provider: "fake" })
+    const workspaceID = yield* oceancode.workspace.create({ provider: "fake" })
     const provisioning =
       policy === "eager"
-        ? yield* opencode.workspace.provision({ workspaceID }).pipe(Effect.forkScoped({ startImmediately: true }))
+        ? yield* oceancode.workspace.provision({ workspaceID }).pipe(Effect.forkScoped({ startImmediately: true }))
         : undefined
     if (provisioning) {
       yield* Deferred.await(createStarted).pipe(
@@ -617,7 +617,7 @@ it.live(
             ],
           },
         )
-        const workspaceID = yield* opencode.workspace.create({ provider: "fake" })
+        const workspaceID = yield* oceancode.workspace.create({ provider: "fake" })
         const session = yield* opencode.sessions.create({
           location: fixture.sdk.Location.Ref.make({
             directory: fixture.sdk.AbsolutePath.make(fixture.directory),
@@ -650,7 +650,7 @@ it.live("preserves unknown workspace provider errors", () =>
   withEmbedded("opencode-embedded-workspace-provider-", (fixture) =>
     Effect.gen(function* () {
       const opencode = yield* fixture.sdk.OpenCode.create()
-      const error = yield* opencode.workspace.create({ provider: "missing" }).pipe(Effect.flip)
+      const error = yield* oceancode.workspace.create({ provider: "missing" }).pipe(Effect.flip)
       expect(error).toEqual(new WorkspaceDriver.ProviderNotFound({ provider: "missing" }))
     }),
   ),

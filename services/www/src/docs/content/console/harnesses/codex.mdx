@@ -12,9 +12,9 @@ Add Console as a model provider in `~/.codex/config.toml` and make it the defaul
 
 ```toml title="~/.codex/config.toml"
 model = "gpt-5.5"
-model_provider = "opencode"
+model_provider = "oceancode"
 
-[model_providers.opencode]
+[model_providers.oceancode]
 name = "OpenCode Console"
 base_url = "https://opencode.ai/inference/openai/v1"
 env_key = "OPENCODE_API_KEY"
@@ -39,9 +39,9 @@ Use the Go base URL and a key from a workspace with a [Go](/console/go) subscrip
 
 ```toml title="~/.codex/config.toml"
 model = "gpt-6-luna"
-model_provider = "opencode-go"
+model_provider = "oceancode-go"
 
-[model_providers.opencode-go]
+[model_providers.oceancode-go]
 name = "OpenCode Go"
 base_url = "https://opencode.ai/inference/go/openai/v1"
 env_key = "OPENCODE_API_KEY"
@@ -76,7 +76,7 @@ profile file that switches to Go.
 
 ```toml title="~/.codex/go.config.toml"
 model = "gpt-6-luna"
-model_provider = "opencode-go"
+model_provider = "oceancode-go"
 ```
 
 ```bash
@@ -88,11 +88,11 @@ codex --profile go
 Add the [Console MCP](/console/harnesses#console-mcp) server and sign in from the browser.
 
 ```bash
-codex mcp add opencode-console --url https://opencode.ai/console/mcp
+codex mcp add oceancode-console --url https://opencode.ai/console/mcp
 ```
 
 If the sign-in doesn't start automatically, run it yourself.
 
 ```bash
-codex mcp login opencode-console
+codex mcp login oceancode-console
 ```

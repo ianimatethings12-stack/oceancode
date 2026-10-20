@@ -1,3 +1,3 @@
-# @opencode/core
+# @oceancode/core
 
-Core runtime services for OpenCode.
+Core runtime services for OceanCode.

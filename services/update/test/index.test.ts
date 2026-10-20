@@ -60,7 +60,7 @@ test("returns a retryable 503 when D1 rejects a lookup", async () => {
     EVENTS: { send: () => Promise.resolve() },
   } as unknown as Env
   const response = await worker.fetch(
-    new Request("https://opencode.ai/update/api/latest/desktop/opencode/opencode-desktop-win-x64.exe"),
+    new Request("https://opencode.ai/update/api/latest/desktop/opencode/oceancode-desktop-win-x64.exe"),
     env,
     { waitUntil: () => {} },
   )
@@ -166,10 +166,10 @@ test("caches rollout fallback reads across caller IPs and overlapping releases",
 
 function publishClaims(ref: string) {
   return {
-    repository: "anomalyco/opencode",
+    repository: "ianimatethings12-stack/oceancode",
     repository_id: "975734319",
     repository_owner_id: "66570915",
-    workflow_ref: `anomalyco/opencode/.github/workflows/publish.yml@${ref}`,
+    workflow_ref: `ianimatethings12-stack/oceancode/.github/workflows/publish.yml@${ref}`,
     ref,
     sha: "0".repeat(40),
     run_id: "1",
