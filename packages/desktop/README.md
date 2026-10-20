@@ -1,6 +1,6 @@
-# OpenCode Desktop
+# OceanCode Desktop
 
-The OpenCode Desktop app, built with Electron.
+The OceanCode Desktop app, built with Electron.
 
 ## Development
 

@@ -72,7 +72,7 @@ Examples:
 
     console.log(result.trim())
   } finally {
-    opencode.server.close()
+    oceancode.server.close()
   }
 }
 

@@ -363,7 +363,7 @@ function useIssueId() {
 }
 
 function useShareUrl() {
-  return isMock() ? "https://dev.opencode.ai" : "https://opencode.ai"
+  return isMock() ? "https://dev.oceancode.ai" : "https://opencode.ai"
 }
 
 async function getAccessToken() {

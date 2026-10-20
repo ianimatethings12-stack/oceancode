@@ -8,8 +8,8 @@ declare global {
 export const InstallationVersion = typeof OPENCODE_VERSION === "string" ? OPENCODE_VERSION : pkg.version
 export const InstallationChannel = typeof OPENCODE_CHANNEL === "string" ? OPENCODE_CHANNEL : "local"
 
-// Preview builds use 0.0.0-<channel>-<timestamp>, which the OpenCode API rejects
-// as older than the minimum supported release. Advertise the package release
-// version for API requests while keeping the build version for CLI/update use.
-export const InstallationAPIVersion = InstallationVersion.startsWith("0.0.0-") ? pkg.version : InstallationVersion
+// The free-tier catalog and inference gate require an OpenCode API version of
+// 1.18.0 or newer. OceanCode ships with its own 0.1.x product version, so keep
+// the API identity pinned independently of the package version.
+export const InstallationAPIVersion = "1.18.34"
 export const InstallationLocal = InstallationChannel === "local"

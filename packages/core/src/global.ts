@@ -1,22 +1,39 @@
 import path from "path"
 import fs from "fs/promises"
+import { existsSync } from "fs"
 import { xdgData, xdgCache, xdgConfig, xdgState } from "xdg-basedir"
 import os from "os"
 import { Context, Effect, Layer } from "effect"
 import { Flock } from "./util/flock"
 import { Flag } from "./flag/flag"
 import { makeGlobalNode } from "./effect/app-node"
+import "./env"
 
-const app = "opencode"
-const data = path.join(xdgData!, app)
-const cache = path.join(xdgCache!, app)
+const app = "oceancode"
+const legacyApp = "opencode"
+
+const data = existingRoot(xdgData!, app)
+const cache = existingRoot(xdgCache!, app)
 const config = path.join(xdgConfig!, app)
-const state = path.join(xdgState!, app)
+const state = existingRoot(xdgState!, app)
 const tmp = path.join(os.tmpdir(), app)
+
+// Existing installs keep their data, cache, and state directories. Config is
+// copied once so the new location is authoritative without losing settings.
+const legacyConfig = path.join(xdgConfig!, legacyApp)
+if (!existsSync(config) && existsSync(legacyConfig)) {
+  await fs.cp(legacyConfig, config, { recursive: true }).catch(() => {})
+}
+
+function existingRoot(base: string, name: string) {
+  const next = path.join(base, name)
+  const previous = path.join(base, legacyApp)
+  return existsSync(previous) && !existsSync(next) ? previous : next
+}
 
 const paths = {
   get home() {
-    return process.env.OPENCODE_TEST_HOME ?? os.homedir()
+    return process.env.OCEANCODE_TEST_HOME ?? process.env.OPENCODE_TEST_HOME ?? os.homedir()
   },
   data,
   bin: path.join(cache, "bin"),

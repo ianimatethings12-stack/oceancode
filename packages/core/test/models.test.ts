@@ -154,25 +154,52 @@ describe("ModelsDev Service", () => {
     }),
   )
 
-  it.live("get() recovers from a corrupted cache file by fetching a fresh catalog", () =>
+  it.live("get() recovers from a corrupted cache file by refreshing the catalog", () =>
     Effect.gen(function* () {
       yield* writeCacheText("{")
       const state = yield* Ref.make({ ...initialState, body: JSON.stringify(fixture2) })
-      const context = yield* Layer.build(buildLayer(state))
-      const result = yield* Effect.acquireUseRelease(
-        Effect.sync(() => {
-          Flag.OPENCODE_DISABLE_MODELS_FETCH = false
+      const result = yield* provided(
+        state,
+        Effect.gen(function* () {
+          const svc = yield* ModelsDev.Service
+          expect(yield* svc.get()).toEqual({})
+          yield* svc.refresh(true)
+          return yield* svc.get()
         }),
-        () => ModelsDev.Service.use((s) => s.get()).pipe(Effect.provide(context)),
-        () =>
-          Effect.sync(() => {
-            Flag.OPENCODE_DISABLE_MODELS_FETCH = true
-          }),
       )
       expect(result).toEqual(fixture2)
       expect(yield* Effect.promise(() => readFile(cacheFile, "utf8"))).toBe(JSON.stringify(fixture2))
       const final = yield* Ref.get(state)
       expect(final.calls.length).toBe(1)
+    }),
+  )
+
+  it.live("accepts catalog models with missing optional capability fields", () =>
+    Effect.gen(function* () {
+      const partial = {
+        acme: {
+          id: "acme",
+          name: "Acme",
+          env: ["ACME_API_KEY"],
+          models: {
+            "acme-min": { id: "acme-min", name: "Acme Minimal" },
+          },
+        },
+      }
+      yield* writeCache(partial)
+      const state = yield* Ref.make(initialState)
+      const result = yield* provided(
+        state,
+        ModelsDev.Service.use((s) => s.get()),
+      )
+      expect(result.acme.models["acme-min"]).toMatchObject({
+        temperature: false,
+        reasoning: false,
+        attachment: false,
+        tool_call: false,
+        release_date: "",
+        limit: { context: 0, output: 0 },
+      })
     }),
   )
 
@@ -232,7 +259,7 @@ describe("ModelsDev Service", () => {
       const final = yield* Ref.get(state)
       expect(final.calls.length).toBe(1)
       expect(final.calls[0].url).toContain("/api.json")
-      expect(final.calls[0].userAgent).toContain("/cli")
+      expect(final.calls[0].userAgent).toContain("oceancode/")
     }),
   )
 

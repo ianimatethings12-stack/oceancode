@@ -20,7 +20,7 @@ const InterleavedField = Schema.Union([
   Schema.String,
 ])
 
-const USER_AGENT = `opencode/${InstallationChannel}/${InstallationAPIVersion}/${Flag.OPENCODE_CLIENT}`
+const USER_AGENT = `oceancode/${InstallationChannel}/${InstallationAPIVersion}/${Flag.OPENCODE_CLIENT}`
 
 const CostTier = Schema.Struct({
   input: Schema.Finite,
@@ -68,11 +68,11 @@ export const Model = Schema.Struct({
   id: Schema.String,
   name: Schema.String,
   family: Schema.optional(Schema.String),
-  release_date: Schema.String,
-  attachment: Schema.Boolean,
-  reasoning: Schema.Boolean,
-  temperature: Schema.Boolean,
-  tool_call: Schema.Boolean,
+  release_date: Schema.String.pipe(Schema.withDecodingDefaultKey(Effect.succeed(""))),
+  attachment: Schema.Boolean.pipe(Schema.withDecodingDefaultKey(Effect.succeed(false))),
+  reasoning: Schema.Boolean.pipe(Schema.withDecodingDefaultKey(Effect.succeed(false))),
+  temperature: Schema.Boolean.pipe(Schema.withDecodingDefaultKey(Effect.succeed(false))),
+  tool_call: Schema.Boolean.pipe(Schema.withDecodingDefaultKey(Effect.succeed(false))),
   reasoning_options: Schema.optional(Schema.Array(ReasoningOption)),
   interleaved: Schema.optional(
     Schema.Union([
@@ -85,10 +85,10 @@ export const Model = Schema.Struct({
   ),
   cost: Schema.optional(Cost),
   limit: Schema.Struct({
-    context: Schema.Finite,
+    context: Schema.Finite.pipe(Schema.withDecodingDefaultKey(Effect.succeed(0))),
     input: Schema.optional(Schema.Finite),
-    output: Schema.Finite,
-  }),
+    output: Schema.Finite.pipe(Schema.withDecodingDefaultKey(Effect.succeed(0))),
+  }).pipe(Schema.withDecodingDefaultKey(Effect.succeed({ context: 0, output: 0 }))),
   modalities: Schema.optional(
     Schema.Struct({
       input: Schema.Array(Schema.Literals(["text", "audio", "image", "video", "pdf"])),
@@ -131,6 +131,8 @@ export const Provider = Schema.Struct({
 
 export type Provider = Schema.Schema.Type<typeof Provider>
 
+const Catalog = Schema.Record(Schema.String, Provider)
+
 export const Event = ModelsDev.Event
 
 declare const OPENCODE_MODELS_DEV: Record<string, Provider> | undefined
@@ -147,21 +149,15 @@ const layer = Layer.effect(
   Effect.gen(function* () {
     const fs = yield* FSUtil.Service
     const events = yield* EventV2.Service
-    const http = HttpClient.filterStatusOk(
-      (yield* HttpClient.HttpClient).pipe(
-        HttpClient.retryTransient({
-          retryOn: "errors-and-responses",
-          times: 2,
-          schedule: Schedule.exponential(200).pipe(Schedule.jittered),
-        }),
-      ),
-    )
+    const client = yield* HttpClient.HttpClient
 
     const source = Flag.OPENCODE_MODELS_URL || "https://models.opencode.ai"
     const filepath = path.join(
       Global.Path.cache,
       source === "https://models.opencode.ai" ? "models.json" : `models-${Hash.fast(source)}.json`,
     )
+    const legacyFilepath = path.join(path.dirname(Global.Path.cache), "opencode", "models.json")
+    const etagPath = `${filepath}.etag`
     const ttl = Duration.minutes(5)
     const lockKey = `models-dev:${filepath}`
 
@@ -172,35 +168,47 @@ const layer = Layer.effect(
       return Date.now() - mtime < Duration.toMillis(ttl)
     })
 
-    const fetchApi = Effect.fn("ModelsDev.fetchApi")(function* () {
-      return yield* HttpClientRequest.get(`${source}/api.json`).pipe(
-        HttpClientRequest.setHeader("User-Agent", USER_AGENT),
-        http.execute,
-        Effect.flatMap((res) => res.text),
-        Effect.timeout("10 seconds"),
+    const readCatalog = (file: string) =>
+      fs.readJson(file).pipe(
+        Effect.map((value) => Option.getOrUndefined(Schema.decodeUnknownOption(Catalog)(value))),
+        Effect.catch(() => Effect.succeed(undefined)),
       )
-    })
 
-    const loadFromDisk = fs.readJson(Flag.OPENCODE_MODELS_PATH ?? filepath).pipe(
-      Effect.catch((error) => {
-        if (
-          Flag.OPENCODE_MODELS_PATH === undefined &&
-          error._tag === "FileSystemError" &&
-          error.method === "readJson"
-        ) {
-          return fs.remove(filepath, { force: true }).pipe(Effect.ignore, Effect.as(undefined))
-        }
-        return Effect.succeed(undefined)
-      }),
-      Effect.map((v) => v as Record<string, Provider> | undefined),
-    )
+    const loadFromDisk = Effect.gen(function* () {
+      if (Flag.OPENCODE_MODELS_PATH) return yield* readCatalog(Flag.OPENCODE_MODELS_PATH)
+      const current = yield* readCatalog(filepath)
+      if (current) return current
+      // Existing OpenCode installs may still have the catalog in the legacy
+      // cache directory. Read it once; the background refresh writes the new
+      // location before the next launch.
+      return yield* readCatalog(legacyFilepath)
+    })
 
     const loadSnapshot = Effect.sync(() =>
       typeof OPENCODE_MODELS_DEV === "undefined" ? undefined : OPENCODE_MODELS_DEV,
     )
 
     const fetchAndWrite = Effect.fn("ModelsDev.fetchAndWrite")(function* () {
-      const text = yield* fetchApi()
+      const cacheExists = yield* fs.existsSafe(filepath)
+      const etag = cacheExists
+        ? yield* fs.readFileStringSafe(etagPath).pipe(Effect.catch(() => Effect.succeed(undefined)))
+        : undefined
+      const response = yield* client.execute(
+        HttpClientRequest.get(`${source}/api.json`).pipe(
+          HttpClientRequest.setHeaders({
+            "User-Agent": USER_AGENT,
+            ...(etag ? { "If-None-Match": etag } : {}),
+          }),
+        ),
+      ).pipe(Effect.timeout("10 seconds"))
+      if (response.status === 304) return undefined
+      if (response.status < 200 || response.status >= 300) {
+        return yield* Effect.fail(new Error(`models.dev returned ${response.status}`))
+      }
+      const text = yield* response.text
+      // Validate before replacing the cache so a truncated or malformed
+      // response cannot poison the next startup.
+      const data = yield* Schema.decodeUnknownEffect(Schema.fromJsonString(Catalog))(text)
       const tempfile = `${filepath}.${process.pid}.${Date.now()}.tmp`
       yield* fs.writeWithDirs(tempfile, text).pipe(
         Effect.andThen(fs.rename(tempfile, filepath)),
@@ -211,35 +219,30 @@ const layer = Layer.effect(
           }),
         ),
       )
-      return text
+      const etagHeader = response.headers["etag"] ?? response.headers["ETag"]
+      if (etagHeader) yield* fs.writeWithDirs(etagPath, etagHeader).pipe(Effect.ignore)
+      return data
     })
 
     const populate = Effect.gen(function* () {
       const fromDisk = yield* loadFromDisk
-      // An explicit path is a caller-owned catalog, and the fetch-disable flag
-      // is used by tests/offline runs; both should bypass network freshness.
-      if (Flag.OPENCODE_MODELS_PATH || Flag.OPENCODE_DISABLE_MODELS_FETCH) {
-        return fromDisk ?? (yield* loadSnapshot) ?? {}
-      }
-      // Prefer a fresh cache, but fetch before building the first catalog when
-      // the cache is missing or stale so the model picker starts from live data.
-      if (fromDisk && (yield* fresh())) return fromDisk
-      // Flock is cross-process: concurrent opencode CLIs can race on this cache file.
-      const current = yield* Effect.scoped(
+      if (fromDisk) return fromDisk
+      const snapshot = yield* loadSnapshot
+      if (snapshot) return snapshot
+      if (Flag.OPENCODE_MODELS_PATH || Flag.OPENCODE_DISABLE_MODELS_FETCH) return {} as Record<string, Provider>
+      // There is no cache and no bundled snapshot (for example a source
+      // checkout). Fetch once before building the first provider catalog;
+      // later launches return the cache immediately and refresh in the
+      // background.
+      return yield* Effect.scoped(
         Effect.gen(function* () {
           yield* Flock.effect(lockKey)
-          // Re-check under the lock: another process may have refreshed between
-          // our outer check and lock acquisition.
-          if (yield* fresh()) {
-            const latest = yield* loadFromDisk
-            if (latest) return latest
-          }
-          const text = yield* fetchAndWrite()
-          return JSON.parse(text) as Record<string, Provider>
+          return (yield* fetchAndWrite()) ?? ({} as Record<string, Provider>)
         }),
-      ).pipe(Effect.catch(() => Effect.succeed(undefined)))
-      if (current) return current
-      return fromDisk ?? (yield* loadSnapshot) ?? {}
+      ).pipe(
+        Effect.tapCause((cause) => Effect.logError("Failed to fetch models.dev on first run", { cause })),
+        Effect.catch(() => Effect.succeed({} as Record<string, Provider>)),
+      )
     }).pipe(Effect.withSpan("ModelsDev.populate"), Effect.orDie)
 
     const [cachedGet, invalidate] = yield* Effect.cachedInvalidateWithTTL(populate, Duration.infinity)
@@ -254,7 +257,8 @@ const layer = Layer.effect(
           // Re-check under the lock: another process may have refreshed between
           // our outer check and lock acquisition.
           if (!force && (yield* fresh())) return
-          yield* fetchAndWrite()
+          const data = yield* fetchAndWrite()
+          if (!data) return
           yield* invalidate
           yield* events.publish(Event.Refreshed, {})
         }),

@@ -123,9 +123,9 @@ export function targetFiles(locale: Locale) {
 }
 
 export function glossaryFile(locale: Locale) {
-  if (locale === "zh") return ".opencode/glossary/zh-cn.md"
-  if (locale === "zht") return ".opencode/glossary/zh-tw.md"
-  return `.opencode/glossary/${locale}.md`
+  if (locale === "zh") return ".oceancode/glossary/zh-cn.md"
+  if (locale === "zht") return ".oceancode/glossary/zh-tw.md"
+  return `.oceancode/glossary/${locale}.md`
 }
 
 export function findDrift(source: Dictionary, target: Dictionary, locale?: Locale) {
@@ -196,7 +196,7 @@ export function modelVariants(output: string, model: string) {
 
 export function translationConfig(agent: string, model: string, targets: string[]) {
   return {
-    $schema: "https://opencode.ai/config.json",
+    $schema: "https://raw.githubusercontent.com/ianimatethings12-stack/oceancode/dev/config.schema.json",
     model,
     default_agent: agent,
     share: "disabled" as const,

@@ -3,12 +3,12 @@ import { defineConfig } from "electron-vite"
 import appPlugin from "@opencode-ai/app/vite"
 import * as fs from "node:fs/promises"
 
-const OPENCODE_SERVER_DIST = "../opencode/dist/node"
+const SERVER_DIST = "../oceancode/dist/node"
 
 const channel = (() => {
-  const raw = process.env.OPENCODE_CHANNEL
+  const raw = process.env.OCEANCODE_CHANNEL ?? process.env.OPENCODE_CHANNEL
   if (raw === "dev" || raw === "beta" || raw === "prod") return raw
-  if (process.env.OPENCODE_CHANNEL === "latest") return "prod"
+  if (raw === "latest") return "prod"
   return "dev"
 })()
 
@@ -34,7 +34,7 @@ const sentry =
 export default defineConfig({
   main: {
     define: {
-      "import.meta.env.OPENCODE_CHANNEL": JSON.stringify(channel),
+      "import.meta.env.OCEANCODE_CHANNEL": JSON.stringify(channel),
     },
     build: {
       rollupOptions: {
@@ -51,7 +51,7 @@ const require = __cjs_mod__.createRequire(import.meta.url);
 `,
         },
       },
-      externalizeDeps: { include: [nodePtyPkg] },
+      externalizeDeps: { include: [nodePtyPkg], exclude: ["drizzle-orm", "jsonc-parser"] },
     },
     plugins: [
       {
@@ -62,18 +62,28 @@ const require = __cjs_mod__.createRequire(import.meta.url);
         },
       },
       {
-        name: "opencode:virtual-server-module",
+        name: "oceancode:virtual-server-module",
         enforce: "pre",
         resolveId(id) {
-          if (id === "virtual:opencode-server") return this.resolve(`${OPENCODE_SERVER_DIST}/node.js`)
+          if (id === "virtual:oceancode-server") return this.resolve(`${SERVER_DIST}/node.js`)
         },
       },
       {
-        name: "opencode:copy-server-assets",
+        name: "oceancode:web-ui-stub",
+        enforce: "pre",
+        resolveId(id) {
+          if (id === "opencode-web-ui.gen.ts") return "\0opencode-web-ui.gen.ts"
+        },
+        load(id) {
+          if (id === "\0opencode-web-ui.gen.ts") return "export default null"
+        },
+      },
+      {
+        name: "oceancode:copy-server-assets",
         async writeBundle() {
-          for (const l of await fs.readdir(OPENCODE_SERVER_DIST)) {
+          for (const l of await fs.readdir(SERVER_DIST)) {
             if (!l.endsWith(".wasm")) continue
-            await fs.writeFile(`./out/main/chunks/${l}`, await fs.readFile(`${OPENCODE_SERVER_DIST}/${l}`))
+            await fs.writeFile(`./out/main/chunks/${l}`, await fs.readFile(`${SERVER_DIST}/${l}`))
           }
         },
       },

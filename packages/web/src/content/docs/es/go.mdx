@@ -15,9 +15,9 @@ OpenCode Go te brinda acceso confiable a modelos abiertos de programación popul
 | **Go**      | **$10/mes** | Acceso de menor costo a los modelos que aparecen a continuación       |
 | **Go Plus** | **$40/mes** | Límites de uso más altos para los modelos que aparecen a continuación |
 
-Go funciona como cualquier otro proveedor en OpenCode. Te suscribes a OpenCode Go y
+Go funciona como cualquier otro proveedor en OceanCode. Te suscribes a OpenCode Go y
 obtienes tu API key. Es **completamente opcional** y no necesitas usarlo para
-usar OpenCode.
+usar OceanCode.
 
 El servicio está diseñado principalmente para usuarios internacionales y ofrece un acceso global estable.
 
@@ -33,7 +33,7 @@ Sin embargo, obtener un acceso confiable y de baja latencia a ellos puede ser di
 varían en calidad y disponibilidad.
 
 :::tip
-Probamos un grupo selecto de modelos y proveedores que funcionan bien con OpenCode.
+Probamos un grupo selecto de modelos y proveedores que funcionan bien con OceanCode.
 :::
 
 Para solucionar esto, hicimos un par de cosas:
@@ -51,7 +51,7 @@ Tanto Go como Go Plus brindan acceso a estos modelos; elige el plan que se adapt
 
 ## Cómo funciona
 
-OpenCode Go funciona como cualquier otro proveedor en OpenCode.
+OpenCode Go funciona como cualquier otro proveedor en OceanCode.
 
 1. Inicias sesión en **<a href={console}>OpenCode Console</a>**, te suscribes a Go o Go Plus y
    copias tu API key.
@@ -102,7 +102,7 @@ La lista de modelos puede cambiar a medida que probamos y agregamos otros nuevos
 
 ## ¿Dónde puedo usarlo?
 
-OpenCode Go está diseñado para [OpenCode](https://opencode.ai) y otros agentes de programación
+OpenCode Go está diseñado para [OceanCode](https://github.com/ianimatethings12-stack/oceancode) y otros agentes de programación
 que generan tipos de peticiones similares. El tráfico se supervisa para detectar abusos que
 perjudiquen la experiencia de otros usuarios.
 
@@ -116,18 +116,18 @@ Tu cliente debe:
 
 ### Clientes validados
 
-Además de OpenCode, se ha validado que los siguientes clientes funcionan correctamente
+Además de OceanCode, se ha validado que los siguientes clientes funcionan correctamente
 con OpenCode Go. Sin embargo, no garantizamos que sigan funcionando en el futuro.
 
 | Cliente           | Compatibilidad con sesiones                                                                                                                                                                                                                                                              |
 | ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Hermes**        | Las compilaciones que incluyen el [PR #101864](https://github.com/NousResearch/hermes-agent/pull/101864) envían el encabezado en las peticiones principales y auxiliares de OpenCode. La corrección se fusionó después de v0.21.0; esa versión por sí sola no la incluye.                |
+| **Hermes**        | Las compilaciones que incluyen el [PR #101864](https://github.com/NousResearch/hermes-agent/pull/101864) envían el encabezado en las peticiones principales y auxiliares de OceanCode. La corrección se fusionó después de v0.21.0; esa versión por sí sola no la incluye.                |
 | **Claude Code**   | Go reconoce su encabezado de sesión nativo. No se necesita ningún wrapper para encabezados personalizados.                                                                                                                                                                               |
 | **Codex**         | Go reconoce su encabezado de sesión nativo. Algunas versiones y configuraciones de proxy aún lo omiten; conserva el encabezado de sesión al reenviar peticiones.                                                                                                                         |
 | **ZCode**         | Go reconoce su encabezado de sesión nativo. Nuestra [solicitud de `x-opencode-session`](https://github.com/zai-org/feedback/issues/492) sigue abierta, pero ya no es necesario enviar ese encabezado específico.                                                                         |
-| **Pi**            | Las compilaciones actuales envían información de sesión para OpenCode. Actualiza las instalaciones antiguas.                                                                                                                                                                             |
+| **Pi**            | Las compilaciones actuales envían información de sesión para OceanCode. Actualiza las instalaciones antiguas.                                                                                                                                                                             |
 | **jcode**         | Actualiza a la versión **v0.81.6 o posterior**, que incluye la [corrección del encabezado de sesión](https://github.com/1jehuang/jcode/issues/1167).                                                                                                                                     |
-| **Kilo Code CLI** | Las compilaciones que incluyen el [PR #13752](https://github.com/Kilo-Org/kilocode/pull/13752) restauran los encabezados de sesión de OpenCode. Esta corrección cubre la CLI, no la extensión de VS Code. Consulta el [issue #13723](https://github.com/Kilo-Org/kilocode/issues/13723). |
+| **Kilo Code CLI** | Las compilaciones que incluyen el [PR #13752](https://github.com/Kilo-Org/kilocode/pull/13752) restauran los encabezados de sesión de OceanCode. Esta corrección cubre la CLI, no la extensión de VS Code. Consulta el [issue #13723](https://github.com/Kilo-Org/kilocode/issues/13723). |
 
 ### Clientes con problemas conocidos
 
@@ -429,9 +429,9 @@ También puedes acceder a los modelos de Go a través de los siguientes endpoint
 | Hy3                          | hy3                          | `https://opencode.ai/zen/go/v1/chat/completions` | `@ai-sdk/openai-compatible` |
 | Space Bunny                  | space-bunny                  | `https://opencode.ai/zen/go/v1/chat/completions` | `@ai-sdk/openai-compatible` |
 
-El [ID del modelo](/docs/config/#models) en tu configuración de OpenCode
-usa el formato `opencode-go/<model-id>`. Por ejemplo, para Kimi K3, usarías
-`opencode-go/kimi-k3` en tu configuración.
+El [ID del modelo](/docs/config/#models) en tu configuración de OceanCode
+usa el formato `oceancode-go/<model-id>`. Por ejemplo, para Kimi K3, usarías
+`oceancode-go/kimi-k3` en tu configuración.
 
 ---
 
@@ -495,4 +495,4 @@ Creamos OpenCode Go para:
 1. Hacer que la programación con IA sea **accesible** para más personas con una suscripción de bajo costo.
 2. Proporcionar un acceso **confiable** a los mejores modelos abiertos de programación.
 3. Seleccionar modelos que estén **probados y evaluados** para su uso en agentes de programación.
-4. Evitar la **dependencia (lock-in)** al permitirte usar también cualquier otro proveedor con OpenCode.
+4. Evitar la **dependencia (lock-in)** al permitirte usar también cualquier otro proveedor con OceanCode.
