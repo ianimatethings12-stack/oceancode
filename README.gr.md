@@ -1,9 +1,9 @@
 <p align="center">
   <a href="https://github.com/ianimatethings12-stack/oceancode">
     <picture>
-      <source srcset="packages/console/app/src/asset/logo-ornate-dark.svg" media="(prefers-color-scheme: dark)">
-      <source srcset="packages/console/app/src/asset/logo-ornate-light.svg" media="(prefers-color-scheme: light)">
-      <img src="packages/console/app/src/asset/logo-ornate-light.svg" alt="OceanCode logo">
+      <source srcset="packages/web/src/assets/oceancode-logo-dark.svg" media="(prefers-color-scheme: dark)">
+      <source srcset="packages/web/src/assets/oceancode-logo-light.svg" media="(prefers-color-scheme: light)">
+      <img src="packages/web/src/assets/oceancode-logo-light.svg" alt="OceanCode logo">
     </picture>
   </a>
 </p>
@@ -50,15 +50,10 @@
 curl -fsSL https://raw.githubusercontent.com/ianimatethings12-stack/oceancode/dev/install | bash
 
 # Διαχειριστές πακέτων
-npm i -g oceancode@latest        # ή bun/pnpm/yarn
-scoop install oceancode             # Windows
-choco install oceancode             # Windows
-brew install ianimatethings12-stack/oceancode # macOS και Linux (προτείνεται, πάντα ενημερωμένο)
-brew install oceancode              # macOS και Linux (επίσημος τύπος brew, λιγότερο συχνές ενημερώσεις)
-sudo pacman -S oceancode            # Arch Linux (Σταθερό)
-paru -S oceancode-bin               # Arch Linux (Τελευταία έκδοση από AUR)
-mise use -g oceancode               # Οποιοδήποτε λειτουργικό σύστημα
-nix run nixpkgs#oceancode           # ή github:ianimatethings12-stack/oceancode με βάση την πιο πρόσφατη αλλαγή από το dev branch
+npm install -g oceancode@latest
+bun add -g oceancode@latest
+pnpm add -g oceancode@latest
+yarn global add oceancode@latest
 ```
 
 > [!TIP]
@@ -66,7 +61,7 @@ nix run nixpkgs#oceancode           # ή github:ianimatethings12-stack/oceancode
 
 ### Εφαρμογή Desktop (BETA)
 
-Το OceanCode είναι επίσης διαθέσιμο ως εφαρμογή. Κατέβασε το απευθείας από τη [σελίδα εκδόσεων](https://github.com/ianimatethings12-stack/oceancode/releases) ή το [oceancode.ai/download](https://github.com/ianimatethings12-stack/oceancode/releases).
+Το OceanCode είναι επίσης διαθέσιμο ως εφαρμογή. Κατέβασε το απευθείας από τη [σελίδα εκδόσεων](https://github.com/ianimatethings12-stack/oceancode/releases) ή το [GitHub Releases](https://github.com/ianimatethings12-stack/oceancode/releases).
 
 | Πλατφόρμα             | Λήψη                               |
 | --------------------- | ---------------------------------- |
@@ -75,12 +70,6 @@ nix run nixpkgs#oceancode           # ή github:ianimatethings12-stack/oceancode
 | Windows               | `oceancode-desktop-windows-x64.exe` |
 | Linux                 | `.deb`, `.rpm`, ή AppImage         |
 
-```bash
-# macOS (Homebrew)
-brew install --cask oceancode-desktop
-# Windows (Scoop)
-scoop bucket add extras; scoop install extras/oceancode-desktop
-```
 
 #### Κατάλογος Εγκατάστασης
 

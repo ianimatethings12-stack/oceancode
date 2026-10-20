@@ -825,7 +825,7 @@ function App(props: { onSnapshot?: () => Promise<string[]>; pluginHost: TuiPlugi
         name: "docs.open",
         title: "Open docs",
         run: () => {
-          openUrl("https://opencode.ai/docs").catch(() => {})
+          openUrl("https://github.com/ianimatethings12-stack/oceancode#readme").catch(() => {})
           dialog.clear()
         },
         category: "System",
@@ -1076,7 +1076,7 @@ function App(props: { onSnapshot?: () => Promise<string[]>; pluginHost: TuiPlugi
     await DialogAlert.show(
       dialog,
       "Update Complete",
-      `Successfully updated to OpenCode v${result.data.version}. Please restart the application.`,
+      `Successfully updated to OceanCode v${result.data.version}. Please restart the application.`,
     )
 
     void exit()

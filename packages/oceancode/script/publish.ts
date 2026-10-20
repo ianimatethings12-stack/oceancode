@@ -8,23 +8,34 @@ process.chdir(dir)
 const pkg = await Bun.file("./package.json").json()
 const version = pkg.version
 
+const dryRun = process.argv.includes("--dry-run") || process.argv.includes("--pack-only")
+const userconfig = process.env.NPM_CONFIG_USERCONFIG
+
 async function published(name: string, version: string) {
-  return (await $`npm view ${name}@${version} version`.nothrow()).exitCode === 0
+  const flags = userconfig ? ["--userconfig", userconfig] : []
+  return (await $`npm view ${name}@${version} version ${flags}`.nothrow()).exitCode === 0
 }
 
 async function publish(path: string, name: string, version: string) {
   if (process.platform !== "win32") await $`chmod -R 755 .`.cwd(path)
+  await $`rm -f *.tgz`.cwd(path).nothrow()
+  await $`bun pm pack`.cwd(path)
+  if (dryRun) {
+    console.log(`[dry-run] packed ${name}-${version}.tgz in ${path}`)
+    return
+  }
   if (await published(name, version)) {
     console.log(`already published ${name}@${version}`)
     return
   }
-  await $`bun pm pack`.cwd(path)
-  await $`npm publish *.tgz --access public --tag latest`.cwd(path)
+  const flags = userconfig ? ["--userconfig", userconfig] : []
+  await $`npm publish ${name}-${version}.tgz --access public --tag latest ${flags}`.cwd(path)
 }
 
 const binaries: Record<string, string> = {}
 for (const filepath of new Bun.Glob("*/package.json").scanSync({ cwd: "./dist" })) {
   const platform = await Bun.file(`./dist/${filepath}`).json()
+  if (platform.name === pkg.name) continue
   binaries[platform.name] = platform.version
 }
 if (Object.keys(binaries).length === 0) {
@@ -37,6 +48,8 @@ const main = `./dist/${pkg.name}`
 await $`mkdir -p ${main}/bin`
 await $`cp ./bin/ocean ${main}/bin/oceancode`
 await $`cp ../../LICENSE ${main}/LICENSE`
+await $`cp ../../NOTICE ${main}/NOTICE`
+await $`cp ../../README.md ${main}/README.md`
 await Bun.file(`${main}/package.json`).write(
   JSON.stringify(
     {

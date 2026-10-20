@@ -1,9 +1,9 @@
 <p align="center">
   <a href="https://github.com/ianimatethings12-stack/oceancode">
     <picture>
-      <source srcset="packages/console/app/src/asset/logo-ornate-dark.svg" media="(prefers-color-scheme: dark)">
-      <source srcset="packages/console/app/src/asset/logo-ornate-light.svg" media="(prefers-color-scheme: light)">
-      <img src="packages/console/app/src/asset/logo-ornate-light.svg" alt="OceanCode logo">
+      <source srcset="packages/web/src/assets/oceancode-logo-dark.svg" media="(prefers-color-scheme: dark)">
+      <source srcset="packages/web/src/assets/oceancode-logo-light.svg" media="(prefers-color-scheme: light)">
+      <img src="packages/web/src/assets/oceancode-logo-light.svg" alt="OceanCode logo">
     </picture>
   </a>
 </p>
@@ -50,15 +50,10 @@
 curl -fsSL https://raw.githubusercontent.com/ianimatethings12-stack/oceancode/dev/install | bash
 
 # Các trình quản lý gói (Package managers)
-npm i -g oceancode@latest        # hoặc bun/pnpm/yarn
-scoop install oceancode             # Windows
-choco install oceancode             # Windows
-brew install ianimatethings12-stack/oceancode # macOS và Linux (khuyên dùng, luôn cập nhật)
-brew install oceancode              # macOS và Linux (công thức brew chính thức, ít cập nhật hơn)
-sudo pacman -S oceancode            # Arch Linux (Bản ổn định)
-paru -S oceancode-bin               # Arch Linux (Bản mới nhất từ AUR)
-mise use -g oceancode               # Mọi hệ điều hành
-nix run nixpkgs#oceancode           # hoặc github:ianimatethings12-stack/oceancode cho nhánh dev mới nhất
+npm install -g oceancode@latest
+bun add -g oceancode@latest
+pnpm add -g oceancode@latest
+yarn global add oceancode@latest
 ```
 
 > [!TIP]
@@ -66,7 +61,7 @@ nix run nixpkgs#oceancode           # hoặc github:ianimatethings12-stack/ocean
 
 ### Ứng dụng Desktop (BETA)
 
-OceanCode cũng có sẵn dưới dạng ứng dụng desktop. Tải trực tiếp từ [trang releases](https://github.com/ianimatethings12-stack/oceancode/releases) hoặc [oceancode.ai/download](https://github.com/ianimatethings12-stack/oceancode/releases).
+OceanCode cũng có sẵn dưới dạng ứng dụng desktop. Tải trực tiếp từ [trang releases](https://github.com/ianimatethings12-stack/oceancode/releases) hoặc [GitHub Releases](https://github.com/ianimatethings12-stack/oceancode/releases).
 
 | Nền tảng              | Tải xuống                          |
 | --------------------- | ---------------------------------- |
@@ -75,12 +70,6 @@ OceanCode cũng có sẵn dưới dạng ứng dụng desktop. Tải trực ti�
 | Windows               | `oceancode-desktop-windows-x64.exe` |
 | Linux                 | `.deb`, `.rpm`, hoặc AppImage      |
 
-```bash
-# macOS (Homebrew)
-brew install --cask oceancode-desktop
-# Windows (Scoop)
-scoop bucket add extras; scoop install extras/oceancode-desktop
-```
 
 #### Thư mục cài đặt
 

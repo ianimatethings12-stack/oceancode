@@ -41,94 +41,14 @@ curl -fsSL https://raw.githubusercontent.com/ianimatethings12-stack/oceancode/de
 
 - **Node.js の使用**
 
-        <Tabs>
-
-      <TabItem label="npm">
-      ```bash
-      npm install -g oceancode
-      ```
-
-          </TabItem>
-
-        <TabItem label="Bun">
-        ```bash
-        bun install -g oceancode
-        ```
-
-          </TabItem>
-
-        <TabItem label="pnpm">
-        ```bash
-        pnpm install -g oceancode
-        ```
-
-          </TabItem>
-
-        <TabItem label="Yarn">
-        ```bash
-        yarn global add oceancode
-        ```
-
-      </TabItem>
-
-  </Tabs>
-
-- **macOS および Linux での Homebrew の使用**
-
-  ```bash
-  brew install ianimatethings12-stack/oceancode
-  ```
-
-  > 最新のリリースには OceanCode タップを使用することをお勧めします。公式の `brew install oceancode` 式は Homebrew チームによって維持されており、更新頻度は低くなります。
-
-- **Arch Linux での Paru の使用**
-
-  ```bash
-  sudo pacman -S oceancode           # Arch Linux (Stable)
-  paru -S oceancode-bin              # Arch Linux (Latest from AUR)
-  ```
-
-#### Windows
-
-:::tip[推奨: WSL を使用する]
-Windows で最高のエクスペリエンスを得るには、[Windows Subsystem for Linux (WSL)](/docs/windows-wsl) を使用することをお勧めします。これにより、パフォーマンスが向上し、OceanCode の機能との完全な互換性が提供されます。
-:::
-
-- **Chocolatey の使用**
-
-  ```bash
-  choco install oceancode
-  ```
-
-- **Scoop の使用**
-
-  ```bash
-  scoop install oceancode
-  ```
-
-- **npm の使用**
-
   ```bash
   npm install -g oceancode
+  bun add -g oceancode
+  pnpm add -g oceancode
+  yarn global add oceancode
   ```
-
-- **Mise の使用**
-
-  ```bash
-  mise use -g github:ianimatethings12-stack/oceancode
-  ```
-
-- **Docker の使用**
-
-  ```bash
-  docker run -it --rm ghcr.io/ianimatethings12-stack/oceancode
-  ```
-
-Bun を使用して Windows に OceanCode をインストールするためのサポートは現在進行中です。
 
 [Releases](https://github.com/ianimatethings12-stack/oceancode/releases).
-
----
 
 ## 設定
 
@@ -137,7 +57,7 @@ OceanCode を使用すると、API キーを構成することで任意の LLM �
 LLM プロバイダーを初めて使用する場合は、[OpenCode Zen](/docs/zen) をお勧めします。
 これは、OceanCode チームによってテストおよび検証されたモデルの厳選されたリストです。
 
-1. TUI で `/connect` コマンドを実行し、oceancode を選択して、[oceancode.ai/auth](https://opencode.ai/auth) で認証します。
+1. TUI で `/connect` コマンドを実行し、oceancode を選択して、[OpenCode Console](https://opencode.ai/auth) (external service) で認証します。
 
    ```txt
    /connect

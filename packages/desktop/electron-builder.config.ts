@@ -37,6 +37,7 @@ const APP_IDS = {
 
 const getBase = (appId: string): Configuration => ({
   artifactName: "oceancode-desktop-${os}-${arch}.${ext}",
+  npmRebuild: false,
   directories: {
     output: "dist",
     buildResources: "resources",
@@ -57,12 +58,16 @@ const getBase = (appId: string): Configuration => ({
       filter: ["oceancode-cli*"],
     },
     {
-      from: "native/",
-      to: "native/",
-      filter: ["index.js", "index.d.ts", "build/Release/mac_window.node", "swift-build/**"],
+      from: "../../LICENSE",
+      to: "LICENSE",
+    },
+    {
+      from: "../../NOTICE",
+      to: "NOTICE",
     },
   ],
   mac: {
+    artifactName: "oceancode-desktop-mac-${arch}.${ext}",
     category: "public.app-category.developer-tools",
     icon: `resources/icons/icon.icns`,
     hardenedRuntime: true,
@@ -80,6 +85,7 @@ const getBase = (appId: string): Configuration => ({
     schemes: ["oceancode"],
   },
   win: {
+    artifactName: "oceancode-desktop-windows-${arch}.${ext}",
     icon: `resources/icons/icon.ico`,
     signtoolOptions: {
       sign: signWindows,
@@ -94,6 +100,7 @@ const getBase = (appId: string): Configuration => ({
     installerHeaderIcon: `resources/icons/icon.ico`,
   },
   linux: {
+    artifactName: "oceancode-desktop-linux-${arch}.${ext}",
     icon: `resources/icons`,
     category: "Development",
     executableName: appId,

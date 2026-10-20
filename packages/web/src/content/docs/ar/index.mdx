@@ -41,94 +41,14 @@ curl -fsSL https://raw.githubusercontent.com/ianimatethings12-stack/oceancode/de
 
 - **باستخدام Node.js**
 
-        <Tabs>
-
-      <TabItem label="npm">
-      ```bash
-      npm install -g oceancode
-      ```
-
-          </TabItem>
-
-        <TabItem label="Bun">
-        ```bash
-        bun install -g oceancode
-        ```
-
-          </TabItem>
-
-        <TabItem label="pnpm">
-        ```bash
-        pnpm install -g oceancode
-        ```
-
-          </TabItem>
-
-        <TabItem label="Yarn">
-        ```bash
-        yarn global add oceancode
-        ```
-
-      </TabItem>
-
-  </Tabs>
-
-- **باستخدام Homebrew على macOS وLinux**
-
-  ```bash
-  brew install ianimatethings12-stack/oceancode
-  ```
-
-  > نوصي باستخدام tap الخاص بـ OceanCode للحصول على أحدث الإصدارات. صيغة `brew install oceancode` الرسمية تُدار بواسطة فريق Homebrew ويتم تحديثها بوتيرة أقل.
-
-- **باستخدام Paru على Arch Linux**
-
-  ```bash
-  sudo pacman -S oceancode           # Arch Linux (Stable)
-  paru -S oceancode-bin              # Arch Linux (Latest from AUR)
-  ```
-
-#### Windows
-
-:::tip[موصى به: استخدم WSL]
-لأفضل تجربة على Windows، نوصي باستخدام [Windows Subsystem for Linux (WSL)](/docs/windows-wsl). يوفر أداء أفضل وتوافقا كاملا مع ميزات OceanCode.
-:::
-
-- **باستخدام Chocolatey**
-
-  ```bash
-  choco install oceancode
-  ```
-
-- **باستخدام Scoop**
-
-  ```bash
-  scoop install oceancode
-  ```
-
-- **باستخدام NPM**
-
   ```bash
   npm install -g oceancode
+  bun add -g oceancode
+  pnpm add -g oceancode
+  yarn global add oceancode
   ```
-
-- **باستخدام Mise**
-
-  ```bash
-  mise use -g github:ianimatethings12-stack/oceancode
-  ```
-
-- **باستخدام Docker**
-
-  ```bash
-  docker run -it --rm ghcr.io/ianimatethings12-stack/oceancode
-  ```
-
-دعم تثبيت OceanCode على Windows باستخدام Bun قيد العمل حاليا.
 
 يمكنك أيضا تنزيل الملف التنفيذي من صفحة [Releases](https://github.com/ianimatethings12-stack/oceancode/releases).
-
----
 
 ## الإعداد
 
@@ -137,7 +57,7 @@ curl -fsSL https://raw.githubusercontent.com/ianimatethings12-stack/oceancode/de
 إذا كنت جديدا على استخدام مزوّدي LLM، فنوصي باستخدام [OpenCode Zen](/docs/zen).
 إنها قائمة منتقاة من النماذج تم اختبارها والتحقق منها بواسطة فريق OceanCode.
 
-1. شغّل الأمر `/connect` في واجهة TUI، واختر oceancode، ثم انتقل إلى [oceancode.ai/auth](https://opencode.ai/auth).
+1. شغّل الأمر `/connect` في واجهة TUI، و OceanCode، ثم انتقل إلى [OpenCode Console](https://opencode.ai/auth) (external service).
 
    ```txt
    /connect

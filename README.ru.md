@@ -1,9 +1,9 @@
 <p align="center">
   <a href="https://github.com/ianimatethings12-stack/oceancode">
     <picture>
-      <source srcset="packages/console/app/src/asset/logo-ornate-dark.svg" media="(prefers-color-scheme: dark)">
-      <source srcset="packages/console/app/src/asset/logo-ornate-light.svg" media="(prefers-color-scheme: light)">
-      <img src="packages/console/app/src/asset/logo-ornate-light.svg" alt="OceanCode logo">
+      <source srcset="packages/web/src/assets/oceancode-logo-dark.svg" media="(prefers-color-scheme: dark)">
+      <source srcset="packages/web/src/assets/oceancode-logo-light.svg" media="(prefers-color-scheme: light)">
+      <img src="packages/web/src/assets/oceancode-logo-light.svg" alt="OceanCode logo">
     </picture>
   </a>
 </p>
@@ -50,15 +50,10 @@
 curl -fsSL https://raw.githubusercontent.com/ianimatethings12-stack/oceancode/dev/install | bash
 
 # Менеджеры пакетов
-npm i -g oceancode@latest        # или bun/pnpm/yarn
-scoop install oceancode             # Windows
-choco install oceancode             # Windows
-brew install ianimatethings12-stack/oceancode # macOS и Linux (рекомендуем, всегда актуально)
-brew install oceancode              # macOS и Linux (официальная формула brew, обновляется реже)
-sudo pacman -S oceancode            # Arch Linux (Stable)
-paru -S oceancode-bin               # Arch Linux (Latest from AUR)
-mise use -g oceancode               # любая ОС
-nix run nixpkgs#oceancode           # или github:ianimatethings12-stack/oceancode для самой свежей ветки dev
+npm install -g oceancode@latest
+bun add -g oceancode@latest
+pnpm add -g oceancode@latest
+yarn global add oceancode@latest
 ```
 
 > [!TIP]
@@ -66,7 +61,7 @@ nix run nixpkgs#oceancode           # или github:ianimatethings12-stack/ocean
 
 ### Десктопное приложение (BETA)
 
-OceanCode также доступен как десктопное приложение. Скачайте его со [страницы релизов](https://github.com/ianimatethings12-stack/oceancode/releases) или с [oceancode.ai/download](https://github.com/ianimatethings12-stack/oceancode/releases).
+OceanCode также доступен как десктопное приложение. Скачайте его со [страницы релизов](https://github.com/ianimatethings12-stack/oceancode/releases) или с [GitHub Releases](https://github.com/ianimatethings12-stack/oceancode/releases).
 
 | Платформа             | Загрузка                           |
 | --------------------- | ---------------------------------- |
@@ -75,12 +70,6 @@ OceanCode также доступен как десктопное приложе
 | Windows               | `oceancode-desktop-windows-x64.exe` |
 | Linux                 | `.deb`, `.rpm` или AppImage        |
 
-```bash
-# macOS (Homebrew)
-brew install --cask oceancode-desktop
-# Windows (Scoop)
-scoop bucket add extras; scoop install extras/oceancode-desktop
-```
 
 #### Каталог установки
 

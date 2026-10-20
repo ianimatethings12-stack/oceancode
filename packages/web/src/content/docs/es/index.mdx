@@ -41,94 +41,14 @@ También puedes instalarlo con alguno de los siguientes métodos:
 
 - **Usando Node.js**
 
-        <Tabs>
-
-      <TabItem label="npm">
-      ```bash
-      npm install -g oceancode
-      ```
-
-          </TabItem>
-
-        <TabItem label="Bun">
-        ```bash
-        bun install -g oceancode
-        ```
-
-          </TabItem>
-
-        <TabItem label="pnpm">
-        ```bash
-        pnpm install -g oceancode
-        ```
-
-          </TabItem>
-
-        <TabItem label="Yarn">
-        ```bash
-        yarn global add oceancode
-        ```
-
-      </TabItem>
-
-  </Tabs>
-
-- **Usando Homebrew en macOS y Linux**
-
-  ```bash
-  brew install ianimatethings12-stack/oceancode
-  ```
-
-  > Recomendamos utilizar el tap OceanCode para las versiones más actualizadas. La fórmula oficial `brew install oceancode` la mantiene el equipo Homebrew y se actualiza con menos frecuencia.
-
-- **Usando Paru en Arch Linux**
-
-  ```bash
-  sudo pacman -S oceancode           # Arch Linux (Stable)
-  paru -S oceancode-bin              # Arch Linux (Latest from AUR)
-  ```
-
-#### Windows
-
-:::tip[Recomendado: Usar WSL]
-Para obtener la mejor experiencia en Windows, recomendamos utilizar [Windows Subsystem for Linux (WSL)](/docs/windows-wsl). Ofrece mejor rendimiento y compatibilidad total con las funciones de OceanCode.
-:::
-
-- **Usando Chocolatey**
-
-  ```bash
-  choco install oceancode
-  ```
-
-- **Usando Scoop**
-
-  ```bash
-  scoop install oceancode
-  ```
-
-- **Usando NPM**
-
   ```bash
   npm install -g oceancode
+  bun add -g oceancode
+  pnpm add -g oceancode
+  yarn global add oceancode
   ```
-
-- **Usando Mise**
-
-  ```bash
-  mise use -g github:ianimatethings12-stack/oceancode
-  ```
-
-- **Usando Docker**
-
-  ```bash
-  docker run -it --rm ghcr.io/ianimatethings12-stack/oceancode
-  ```
-
-El soporte para instalar OceanCode en Windows usando Bun todavía está en desarrollo.
 
 También puede obtener el binario desde [Versiones](https://github.com/ianimatethings12-stack/oceancode/releases).
-
----
 
 ## Configuración
 
@@ -137,7 +57,7 @@ Con OceanCode, puede usar cualquier proveedor de LLM configurando sus claves de 
 Si es nuevo en el uso de proveedores de LLM, le recomendamos usar [OpenCode Zen](/docs/zen).
 Es una selección de modelos probados y verificados por el equipo de OceanCode.
 
-1. Ejecute el comando `/connect` en la TUI, seleccione oceancode y diríjase a [oceancode.ai/auth](https://opencode.ai/auth).
+1. Ejecute el comando `/connect` en la TUI,  OceanCode y diríjase a [OpenCode Console](https://opencode.ai/auth) (external service).
 
    ```txt
    /connect

@@ -61,7 +61,11 @@ else
 fi
 
 mkdir -p "$install_dir"
-dest="$install_dir/oceancode"
+if [ "$os" = "windows" ]; then
+  dest="$install_dir/oceancode.exe"
+else
+  dest="$install_dir/oceancode"
+fi
 cp "$binary" "$dest"
 chmod 755 "$dest"
 

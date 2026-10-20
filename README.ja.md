@@ -1,9 +1,9 @@
 <p align="center">
   <a href="https://github.com/ianimatethings12-stack/oceancode">
     <picture>
-      <source srcset="packages/console/app/src/asset/logo-ornate-dark.svg" media="(prefers-color-scheme: dark)">
-      <source srcset="packages/console/app/src/asset/logo-ornate-light.svg" media="(prefers-color-scheme: light)">
-      <img src="packages/console/app/src/asset/logo-ornate-light.svg" alt="OceanCode logo">
+      <source srcset="packages/web/src/assets/oceancode-logo-dark.svg" media="(prefers-color-scheme: dark)">
+      <source srcset="packages/web/src/assets/oceancode-logo-light.svg" media="(prefers-color-scheme: light)">
+      <img src="packages/web/src/assets/oceancode-logo-light.svg" alt="OceanCode logo">
     </picture>
   </a>
 </p>
@@ -50,15 +50,10 @@
 curl -fsSL https://raw.githubusercontent.com/ianimatethings12-stack/oceancode/dev/install | bash
 
 # パッケージマネージャー
-npm i -g oceancode@latest        # bun/pnpm/yarn でもOK
-scoop install oceancode             # Windows
-choco install oceancode             # Windows
-brew install ianimatethings12-stack/oceancode # macOS と Linux（推奨。常に最新）
-brew install oceancode              # macOS と Linux（公式 brew formula。更新頻度は低め）
-sudo pacman -S oceancode            # Arch Linux (Stable)
-paru -S oceancode-bin               # Arch Linux (Latest from AUR)
-mise use -g oceancode               # どのOSでも
-nix run nixpkgs#oceancode           # または github:ianimatethings12-stack/oceancode で最新 dev ブランチ
+npm install -g oceancode@latest
+bun add -g oceancode@latest
+pnpm add -g oceancode@latest
+yarn global add oceancode@latest
 ```
 
 > [!TIP]
@@ -66,7 +61,7 @@ nix run nixpkgs#oceancode           # または github:ianimatethings12-stack/oc
 
 ### デスクトップアプリ (BETA)
 
-OceanCode はデスクトップアプリとしても利用できます。[releases page](https://github.com/ianimatethings12-stack/oceancode/releases) から直接ダウンロードするか、[oceancode.ai/download](https://github.com/ianimatethings12-stack/oceancode/releases) を利用してください。
+OceanCode はデスクトップアプリとしても利用できます。[releases page](https://github.com/ianimatethings12-stack/oceancode/releases) から直接ダウンロードするか、[GitHub Releases](https://github.com/ianimatethings12-stack/oceancode/releases) を利用してください。
 
 | プラットフォーム      | ダウンロード                       |
 | --------------------- | ---------------------------------- |
@@ -75,12 +70,6 @@ OceanCode はデスクトップアプリとしても利用できます。[releas
 | Windows               | `oceancode-desktop-windows-x64.exe` |
 | Linux                 | `.deb`、`.rpm`、または AppImage    |
 
-```bash
-# macOS (Homebrew)
-brew install --cask oceancode-desktop
-# Windows (Scoop)
-scoop bucket add extras; scoop install extras/oceancode-desktop
-```
 
 #### インストールディレクトリ
 

@@ -186,7 +186,7 @@ const layer: Layer.Layer<Service, never, HttpClient.HttpClient | AppProcess.Serv
       latest: Effect.fn("Installation.latest")(function* (installMethod?: Method) {
         const detectedMethod = installMethod || (yield* result.method())
 
-        if (detectedMethod === "npm" || detectedMethod === "bun" || detectedMethod === "pnpm") {
+        if (detectedMethod === "npm" || detectedMethod === "bun" || detectedMethod === "pnpm" || detectedMethod === "yarn") {
           const response = yield* httpOk.execute(
             HttpClientRequest.get(
               `${yield* NpmConfig.registry(process.cwd())}/oceancode/${InstallationChannel}`,
@@ -218,6 +218,9 @@ const layer: Layer.Layer<Service, never, HttpClient.HttpClient | AppProcess.Serv
             break
           case "bun":
             upgradeResult = yield* run(["bun", "install", "-g", `oceancode@${target}`])
+            break
+          case "yarn":
+            upgradeResult = yield* run(["yarn", "global", "add", `oceancode@${target}`])
             break
           default:
             return yield* new UpgradeFailedError({ stderr: `Unsupported installation method: ${m}` })

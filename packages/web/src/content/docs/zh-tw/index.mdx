@@ -41,94 +41,14 @@ curl -fsSL https://raw.githubusercontent.com/ianimatethings12-stack/oceancode/de
 
 - **使用 Node.js**
 
-        <Tabs>
-
-      <TabItem label="npm">
-      ```bash
-      npm install -g oceancode
-      ```
-
-          </TabItem>
-
-        <TabItem label="Bun">
-        ```bash
-        bun install -g oceancode
-        ```
-
-          </TabItem>
-
-        <TabItem label="pnpm">
-        ```bash
-        pnpm install -g oceancode
-        ```
-
-          </TabItem>
-
-        <TabItem label="Yarn">
-        ```bash
-        yarn global add oceancode
-        ```
-
-      </TabItem>
-
-  </Tabs>
-
-- **在 macOS 和 Linux 上使用 Homebrew**
-
-  ```bash
-  brew install ianimatethings12-stack/oceancode
-  ```
-
-  > 我們推薦使用 OceanCode tap 以取得最新版本。官方的 `brew install oceancode` formula 由 Homebrew 團隊維護，更新頻率較低。
-
-- **在 Arch Linux 上安裝**
-
-  ```bash
-  sudo pacman -S oceancode           # Arch Linux (Stable)
-  paru -S oceancode-bin              # Arch Linux (Latest from AUR)
-  ```
-
-#### Windows
-
-:::tip[推薦：使用 WSL]
-為了在 Windows 上獲得最佳體驗，我們推薦使用 [Windows Subsystem for Linux (WSL)](/docs/windows-wsl)。它提供更好的效能，並完全相容 OceanCode 的所有功能。
-:::
-
-- **使用 Chocolatey**
-
-  ```bash
-  choco install oceancode
-  ```
-
-- **使用 Scoop**
-
-  ```bash
-  scoop install oceancode
-  ```
-
-- **使用 NPM**
-
   ```bash
   npm install -g oceancode
+  bun add -g oceancode
+  pnpm add -g oceancode
+  yarn global add oceancode
   ```
-
-- **使用 Mise**
-
-  ```bash
-  mise use -g github:ianimatethings12-stack/oceancode
-  ```
-
-- **使用 Docker**
-
-  ```bash
-  docker run -it --rm ghcr.io/ianimatethings12-stack/oceancode
-  ```
-
-在 Windows 上透過 Bun 安裝 OceanCode 的支援目前正在開發中。
 
 您也可以從 [Releases](https://github.com/ianimatethings12-stack/oceancode/releases) 頁面直接下載二進位檔案。
-
----
 
 ## 設定
 
@@ -136,7 +56,7 @@ curl -fsSL https://raw.githubusercontent.com/ianimatethings12-stack/oceancode/de
 
 如果您剛開始接觸 LLM 供應商，我們推薦使用 [OpenCode Zen](/docs/zen)。這是一組經過 OceanCode 團隊測試和驗證的精選模型。
 
-1. 在 TUI 中執行 `/connect` 指令，選擇 oceancode，然後前往 [oceancode.ai/auth](https://opencode.ai/auth)。
+1. 在 TUI 中執行 `/connect` 指令， OceanCode，然後前往 [OpenCode Console](https://opencode.ai/auth) (external service)。
 
    ```txt
    /connect

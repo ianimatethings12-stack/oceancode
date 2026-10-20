@@ -1,9 +1,9 @@
 <p align="center">
   <a href="https://github.com/ianimatethings12-stack/oceancode">
     <picture>
-      <source srcset="packages/console/app/src/asset/logo-ornate-dark.svg" media="(prefers-color-scheme: dark)">
-      <source srcset="packages/console/app/src/asset/logo-ornate-light.svg" media="(prefers-color-scheme: light)">
-      <img src="packages/console/app/src/asset/logo-ornate-light.svg" alt="OceanCode logo">
+      <source srcset="packages/web/src/assets/oceancode-logo-dark.svg" media="(prefers-color-scheme: dark)">
+      <source srcset="packages/web/src/assets/oceancode-logo-light.svg" media="(prefers-color-scheme: light)">
+      <img src="packages/web/src/assets/oceancode-logo-light.svg" alt="OceanCode logo">
     </picture>
   </a>
 </p>
@@ -63,14 +63,13 @@ yarn global add oceancode@latest
 
 OceanCode is also available as a desktop application. Download the unsigned v0.1 build from the [releases page](https://github.com/ianimatethings12-stack/oceancode/releases).
 
-| Platform              | Download                            |
-| --------------------- | ----------------------------------- |
-| macOS (Apple Silicon) | `oceancode-desktop-mac-arm64.dmg`   |
-| macOS (Intel)         | `oceancode-desktop-mac-x64.dmg`     |
-| Windows               | `oceancode-desktop-windows-x64.exe` |
-| Linux                 | `.deb`, `.rpm`, or `.AppImage`      |
+| Platform              | Download                                  |
+| --------------------- | ----------------------------------------- |
+| macOS (Apple Silicon) | `oceancode-desktop-mac-arm64.dmg`         |
+| Windows               | `oceancode-desktop-windows-x64.exe`       |
+| Linux                 | `oceancode-desktop-linux-x64.AppImage`    |
 
-v0.1 desktop builds are unsigned. macOS may require right-click → Open, and Windows may show a SmartScreen warning.
+v0.1 desktop builds are unsigned and macOS Intel builds are not yet available. macOS may require right-click → Open, and Windows may show a SmartScreen warning.
 
 #### Installation Directory
 
@@ -112,7 +111,7 @@ If you're interested in contributing to OceanCode, please read our [contributing
 
 ### Building on OceanCode
 
-If you are working on a project that's related to OceanCode and is using "oceancode" as part of its name, for example "opencode-dashboard" or "opencode-mobile", please add a note to your README to clarify that it is not built by the OceanCode team and is not affiliated with us in any way.
+If you maintain a third-party project with "oceancode" in its name, for example "oceancode-dashboard" or "oceancode-mobile", please add a note to your README to clarify that it is not built by the OceanCode team and is not affiliated with us in any way.
 
 ---
 

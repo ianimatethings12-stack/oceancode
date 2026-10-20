@@ -41,94 +41,14 @@ Ayrıca aşağıdaki komutlarla da yükleyebilirsiniz:
 
 - **Node.js'yi kullanma**
 
-        <Tabs>
-
-      <TabItem label="npm">
-      ```bash
-      npm install -g oceancode
-      ```
-
-          </TabItem>
-
-        <TabItem label="Bun">
-        ```bash
-        bun install -g oceancode
-        ```
-
-          </TabItem>
-
-        <TabItem label="pnpm">
-        ```bash
-        pnpm install -g oceancode
-        ```
-
-          </TabItem>
-
-        <TabItem label="Yarn">
-        ```bash
-        yarn global add oceancode
-        ```
-
-      </TabItem>
-
-  </Tabs>
-
-- **Homebrew'u macOS ve Linux'ta kullanma**
-
-  ```bash
-  brew install ianimatethings12-stack/oceancode
-  ```
-
-  > En güncel sürümler için OceanCode tap'ini kullanmanızı öneririz. Resmi `brew install oceancode` formülü Homebrew ekibi tarafından korunur ve daha sık güncellenir.
-
-- **Paru'yu Arch Linux'ta kullanma**
-
-  ```bash
-  sudo pacman -S oceancode           # Arch Linux (Stable)
-  paru -S oceancode-bin              # Arch Linux (Latest from AUR)
-  ```
-
-#### Windows
-
-:::tip[Önerilen: WSL kullanın]
-Windows'ta en iyi deneyim için [Windows Subsystem for Linux (WSL)](/docs/windows-wsl) kullanılmasını öneririz. Daha iyi performans ve OceanCode'un özellikleriyle tam uyumluluğu sağlar.
-:::
-
-- **Chocolatey Kullanımı**
-
-  ```bash
-  choco install oceancode
-  ```
-
-- **Scoop Kullanımı**
-
-  ```bash
-  scoop install oceancode
-  ```
-
-- **NPM kullanarak**
-
   ```bash
   npm install -g oceancode
+  bun add -g oceancode
+  pnpm add -g oceancode
+  yarn global add oceancode
   ```
-
-- **Mise Kullanımı**
-
-  ```bash
-  mise use -g github:ianimatethings12-stack/oceancode
-  ```
-
-- **Docker'ı kullanma**
-
-  ```bash
-  docker run -it --rm ghcr.io/ianimatethings12-stack/oceancode
-  ```
-
-OceanCode'un Bun kullanılarak Windows'a yüklenmesine yönelik destek şu anda devam etmektedir.
 
 İkili dosyayı [Releases](https://github.com/ianimatethings12-stack/oceancode/releases)'dan da alabilirsiniz.
-
----
 
 ## Yapılandırma
 
@@ -137,7 +57,7 @@ OceanCode ile herhangi bir LLM sağlayıcısının API anahtarlarını yapıland
 LLM sağlayıcılarını kullanmaya yeni başlıyorsanız, [OpenCode Zen](/docs/zen) kullanmanızı öneririz.
 OceanCode ekibi tarafından test edilmiş ve doğrulanmış modellerin seçilmiş bir listesidir.
 
-1. TUI'de `/connect` komutunu çalıştırın, OceanCode'u seçin ve [oceancode.ai/auth](https://opencode.ai/auth)'ye gidin.
+1. TUI'de `/connect` komutunu çalıştırın, OceanCode'u seçin ve [OpenCode Console](https://opencode.ai/auth) (external service)'ye gidin.
 
    ```txt
    /connect

@@ -20,7 +20,7 @@ const InterleavedField = Schema.Union([
   Schema.String,
 ])
 
-const USER_AGENT = `opencode/${InstallationChannel}/${InstallationAPIVersion}/${Flag.OPENCODE_CLIENT}`
+const USER_AGENT = `oceancode/${InstallationChannel}/${InstallationAPIVersion}/${Flag.OPENCODE_CLIENT}`
 
 const CostTier = Schema.Struct({
   input: Schema.Finite,
@@ -68,11 +68,11 @@ export const Model = Schema.Struct({
   id: Schema.String,
   name: Schema.String,
   family: Schema.optional(Schema.String),
-  release_date: Schema.String,
-  attachment: Schema.Boolean,
-  reasoning: Schema.Boolean,
-  temperature: Schema.Boolean,
-  tool_call: Schema.Boolean,
+  release_date: Schema.String.pipe(Schema.withDecodingDefaultKey(Effect.succeed(""))),
+  attachment: Schema.Boolean.pipe(Schema.withDecodingDefaultKey(Effect.succeed(false))),
+  reasoning: Schema.Boolean.pipe(Schema.withDecodingDefaultKey(Effect.succeed(false))),
+  temperature: Schema.Boolean.pipe(Schema.withDecodingDefaultKey(Effect.succeed(false))),
+  tool_call: Schema.Boolean.pipe(Schema.withDecodingDefaultKey(Effect.succeed(false))),
   reasoning_options: Schema.optional(Schema.Array(ReasoningOption)),
   interleaved: Schema.optional(
     Schema.Union([
@@ -85,10 +85,10 @@ export const Model = Schema.Struct({
   ),
   cost: Schema.optional(Cost),
   limit: Schema.Struct({
-    context: Schema.Finite,
+    context: Schema.Finite.pipe(Schema.withDecodingDefaultKey(Effect.succeed(0))),
     input: Schema.optional(Schema.Finite),
-    output: Schema.Finite,
-  }),
+    output: Schema.Finite.pipe(Schema.withDecodingDefaultKey(Effect.succeed(0))),
+  }).pipe(Schema.withDecodingDefaultKey(Effect.succeed({ context: 0, output: 0 }))),
   modalities: Schema.optional(
     Schema.Struct({
       input: Schema.Array(Schema.Literals(["text", "audio", "image", "video", "pdf"])),
@@ -156,6 +156,7 @@ const layer = Layer.effect(
       Global.Path.cache,
       source === "https://models.opencode.ai" ? "models.json" : `models-${Hash.fast(source)}.json`,
     )
+    const legacyFilepath = path.join(path.dirname(Global.Path.cache), "opencode", "models.json")
     const etagPath = `${filepath}.etag`
     const ttl = Duration.minutes(5)
     const lockKey = `models-dev:${filepath}`
@@ -167,22 +168,31 @@ const layer = Layer.effect(
       return Date.now() - mtime < Duration.toMillis(ttl)
     })
 
-    const loadFromDisk = fs.readJson(Flag.OPENCODE_MODELS_PATH ?? filepath).pipe(
-      Effect.map((value) => Option.getOrUndefined(Schema.decodeUnknownOption(Catalog)(value))),
-      Effect.catch(() => {
-        if (Flag.OPENCODE_MODELS_PATH === undefined) {
-          return fs.remove(filepath, { force: true }).pipe(Effect.ignore, Effect.as(undefined))
-        }
-        return Effect.succeed(undefined)
-      }),
-    )
+    const readCatalog = (file: string) =>
+      fs.readJson(file).pipe(
+        Effect.map((value) => Option.getOrUndefined(Schema.decodeUnknownOption(Catalog)(value))),
+        Effect.catch(() => Effect.succeed(undefined)),
+      )
+
+    const loadFromDisk = Effect.gen(function* () {
+      if (Flag.OPENCODE_MODELS_PATH) return yield* readCatalog(Flag.OPENCODE_MODELS_PATH)
+      const current = yield* readCatalog(filepath)
+      if (current) return current
+      // Existing OpenCode installs may still have the catalog in the legacy
+      // cache directory. Read it once; the background refresh writes the new
+      // location before the next launch.
+      return yield* readCatalog(legacyFilepath)
+    })
 
     const loadSnapshot = Effect.sync(() =>
       typeof OPENCODE_MODELS_DEV === "undefined" ? undefined : OPENCODE_MODELS_DEV,
     )
 
     const fetchAndWrite = Effect.fn("ModelsDev.fetchAndWrite")(function* () {
-      const etag = yield* fs.readFileStringSafe(etagPath).pipe(Effect.catch(() => Effect.succeed(undefined)))
+      const cacheExists = yield* fs.existsSafe(filepath)
+      const etag = cacheExists
+        ? yield* fs.readFileStringSafe(etagPath).pipe(Effect.catch(() => Effect.succeed(undefined)))
+        : undefined
       const response = yield* client.execute(
         HttpClientRequest.get(`${source}/api.json`).pipe(
           HttpClientRequest.setHeaders({
@@ -190,7 +200,7 @@ const layer = Layer.effect(
             ...(etag ? { "If-None-Match": etag } : {}),
           }),
         ),
-      )
+      ).pipe(Effect.timeout("10 seconds"))
       if (response.status === 304) return undefined
       if (response.status < 200 || response.status >= 300) {
         return yield* Effect.fail(new Error(`models.dev returned ${response.status}`))
@@ -215,10 +225,24 @@ const layer = Layer.effect(
     })
 
     const populate = Effect.gen(function* () {
-      // Do not block startup on the multi-megabyte catalog. The cached copy or
-      // bundled snapshot is enough to render the first picker; the refresh
-      // loop publishes catalog.updated as soon as newer data is available.
-      return (yield* loadFromDisk) ?? (yield* loadSnapshot) ?? ({} as Record<string, Provider>)
+      const fromDisk = yield* loadFromDisk
+      if (fromDisk) return fromDisk
+      const snapshot = yield* loadSnapshot
+      if (snapshot) return snapshot
+      if (Flag.OPENCODE_MODELS_PATH || Flag.OPENCODE_DISABLE_MODELS_FETCH) return {} as Record<string, Provider>
+      // There is no cache and no bundled snapshot (for example a source
+      // checkout). Fetch once before building the first provider catalog;
+      // later launches return the cache immediately and refresh in the
+      // background.
+      return yield* Effect.scoped(
+        Effect.gen(function* () {
+          yield* Flock.effect(lockKey)
+          return (yield* fetchAndWrite()) ?? ({} as Record<string, Provider>)
+        }),
+      ).pipe(
+        Effect.tapCause((cause) => Effect.logError("Failed to fetch models.dev on first run", { cause })),
+        Effect.catch(() => Effect.succeed({} as Record<string, Provider>)),
+      )
     }).pipe(Effect.withSpan("ModelsDev.populate"), Effect.orDie)
 
     const [cachedGet, invalidate] = yield* Effect.cachedInvalidateWithTTL(populate, Duration.infinity)

@@ -14,6 +14,7 @@ import { ConfigProviderOptionsV1 } from "../../v1/config/provider-options"
 import { ConfigV1 } from "../../v1/config/config"
 
 const defaultServer = "https://opencode.ai/console"
+// Upstream free-tier inference endpoint: https://opencode.ai/inference/openai/v1
 const clientID = "oceancode-cli"
 const methodID = Integration.MethodID.make("device")
 const RemoteResponse = Schema.Struct({ config: ConfigV1.Info })

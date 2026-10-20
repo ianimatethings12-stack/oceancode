@@ -27,6 +27,8 @@ const EXCLUDES = new Set([
 ])
 const SKIP_FILES = new Set(["bun.lock", "package-lock.json", "pnpm-lock.yaml", "yarn.lock"])
 const SKIP_PATHS = [
+  ".opencode",
+  "script/rebrand.ts",
   "packages/client/src/generated",
   "packages/client/src/generated-effect",
   "packages/sdk/js/src/gen",
@@ -109,6 +111,13 @@ const PROTECTED = [
   "OpenCode Go",
   "OpenCode GitHub App",
   "OpenCode's free tier",
+  // Legacy config compatibility. These names must stay readable.
+  '"opencode.jsonc", "opencode.json", "config.json"',
+  '["opencode.json", "opencode.jsonc", "oceancode.json", "oceancode.jsonc"]',
+  'path.join(Global.Path.config, "opencode.json")',
+  'path.join(Global.Path.config, "opencode.jsonc")',
+  '["opencode.jsonc", "opencode.json"]',
+  '"opencode-ai"',
   // Third-party packages and community projects whose names contain opencode.
   "opencode-gitlab-auth",
   "opencode-poe-auth",
@@ -127,6 +136,7 @@ const PROTECTED = [
   "opencode-devcontainers",
   "opencode-dashboard",
   "opencode-mobile",
+  "opencode-ai-client-",
   // Model IDs used by the kept OpenCode Zen provider.
   "opencode/gpt-",
   "opencode/claude-",
@@ -416,17 +426,12 @@ const RULES: Rule[] = [
 const FORBIDDEN = [
   /anomalyco\/opencode/,
   /sst\/opencode/,
-  /github\.com\/anomalyco/,
-  /github\.com\/sst/,
+  /github\.com\/anomalyco\/opencode/,
+  /github\.com\/sst\/opencode/,
   /https:\/\/opencode\.ai\/install/,
   /https:\/\/opencode\.ai\/docs/,
   /https:\/\/opencode\.ai\/discord/,
   /https:\/\/opencode\.ai\/download/,
-  /ai\.oceancode\.desktop/,
-  /oceancode-desktop/,
-  /oceancode@/,
-  /npm install -g oceancode/,
-  /bun i -g oceancode/,
 ]
 
 const REQUIRED = [

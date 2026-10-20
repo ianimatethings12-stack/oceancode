@@ -41,94 +41,14 @@ Du kan også installere det med følgende kommandoer:
 
 - **Bruger Node.js**
 
-        <Tabs>
-
-      <TabItem label="npm">
-      ```bash
-      npm install -g oceancode
-      ```
-
-          </TabItem>
-
-        <TabItem label="Bun">
-        ```bash
-        bun install -g oceancode
-        ```
-
-          </TabItem>
-
-        <TabItem label="pnpm">
-        ```bash
-        pnpm install -g oceancode
-        ```
-
-          </TabItem>
-
-        <TabItem label="Yarn">
-        ```bash
-        yarn global add oceancode
-        ```
-
-      </TabItem>
-
-  </Tabs>
-
-- **Brug af Homebrew på macOS og Linux**
-
-  ```bash
-  brew install ianimatethings12-stack/oceancode
-  ```
-
-  > Vi anbefaler at bruge OceanCode-tap for at få de mest opdaterede udgivelser. Den officielle `brew install oceancode`-formel vedligeholdes af Homebrew-teamet og opdateret sjældnere.
-
-- **Brug af Paru på Arch Linux**
-
-  ```bash
-  sudo pacman -S oceancode           # Arch Linux (Stable)
-  paru -S oceancode-bin              # Arch Linux (Latest from AUR)
-  ```
-
-#### Windows
-
-:::tip[Anbefalet: Brug WSL]
-For at få den bedste oplevelse på Windows anbefaler vi at bruge [Windows Subsystem for Linux (WSL)](/docs/windows-wsl). Det giver bedre ydeevne og fuld kompatibilitet med OpenCodes funktioner.
-:::
-
-- **Brug af Chocolatey**
-
-  ```bash
-  choco install oceancode
-  ```
-
-- **Brug af Scoop**
-
-  ```bash
-  scoop install oceancode
-  ```
-
-- **Bruger NPM**
-
   ```bash
   npm install -g oceancode
+  bun add -g oceancode
+  pnpm add -g oceancode
+  yarn global add oceancode
   ```
-
-- **Brug af Mise**
-
-  ```bash
-  mise use -g github:ianimatethings12-stack/oceancode
-  ```
-
-- **Brug af Docker**
-
-  ```bash
-  docker run -it --rm ghcr.io/ianimatethings12-stack/oceancode
-  ```
-
-Support til installation af OceanCode på Windows ved hjælp af Bun er i gang.
 
 Du kan også få fat i binæren fra [Releases](https://github.com/ianimatethings12-stack/oceancode/releases).
-
----
 
 ## Konfiguration
 
@@ -138,7 +58,7 @@ Hvis du er ny til at bruge LLM-udbydere, anbefaler vi at bruge [OpenCode Zen](/d
 Det er en udvalgt liste over modeller, der er blevet testet og verificeret af OceanCode
 holde.
 
-1. Kør kommandoen `/connect` i TUI, vælg oceancode, og gå til [oceancode.ai/auth](https://opencode.ai/auth).
+1. Kør kommandoen `/connect` i TUI, vælg oceancode, og gå til [OpenCode Console](https://opencode.ai/auth) (external service).
 
    ```txt
    /connect

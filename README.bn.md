@@ -1,9 +1,9 @@
 <p align="center">
   <a href="https://github.com/ianimatethings12-stack/oceancode">
     <picture>
-      <source srcset="packages/console/app/src/asset/logo-ornate-dark.svg" media="(prefers-color-scheme: dark)">
-      <source srcset="packages/console/app/src/asset/logo-ornate-light.svg" media="(prefers-color-scheme: light)">
-      <img src="packages/console/app/src/asset/logo-ornate-light.svg" alt="OceanCode logo">
+      <source srcset="packages/web/src/assets/oceancode-logo-dark.svg" media="(prefers-color-scheme: dark)">
+      <source srcset="packages/web/src/assets/oceancode-logo-light.svg" media="(prefers-color-scheme: light)">
+      <img src="packages/web/src/assets/oceancode-logo-light.svg" alt="OceanCode logo">
     </picture>
   </a>
 </p>
@@ -50,15 +50,10 @@
 curl -fsSL https://raw.githubusercontent.com/ianimatethings12-stack/oceancode/dev/install | bash
 
 # Package managers
-npm i -g oceancode@latest        # or bun/pnpm/yarn
-scoop install oceancode             # Windows
-choco install oceancode             # Windows
-brew install ianimatethings12-stack/oceancode # macOS and Linux (recommended, always up to date)
-brew install oceancode              # macOS and Linux (official brew formula, updated less)
-sudo pacman -S oceancode            # Arch Linux (Stable)
-paru -S oceancode-bin               # Arch Linux (Latest from AUR)
-mise use -g oceancode               # Any OS
-nix run nixpkgs#oceancode           # or github:ianimatethings12-stack/oceancode for latest dev branch
+npm install -g oceancode@latest
+bun add -g oceancode@latest
+pnpm add -g oceancode@latest
+yarn global add oceancode@latest
 ```
 
 > [!TIP]
@@ -66,7 +61,7 @@ nix run nixpkgs#oceancode           # or github:ianimatethings12-stack/oceancode
 
 ### ডেস্কটপ অ্যাপ (BETA)
 
-OceanCode ডেস্কটপ অ্যাপ্লিকেশন হিসেবেও উপলব্ধ। সরাসরি [রিলিজ পেজ](https://github.com/ianimatethings12-stack/oceancode/releases) অথবা [oceancode.ai/download](https://github.com/ianimatethings12-stack/oceancode/releases) থেকে ডাউনলোড করুন।
+OceanCode ডেস্কটপ অ্যাপ্লিকেশন হিসেবেও উপলব্ধ। সরাসরি [রিলিজ পেজ](https://github.com/ianimatethings12-stack/oceancode/releases) অথবা [GitHub Releases](https://github.com/ianimatethings12-stack/oceancode/releases) থেকে ডাউনলোড করুন।
 
 | প্ল্যাটফর্ম           | ডাউনলোড                            |
 | --------------------- | ---------------------------------- |
@@ -75,12 +70,6 @@ OceanCode ডেস্কটপ অ্যাপ্লিকেশন হিস�
 | Windows               | `oceancode-desktop-windows-x64.exe` |
 | Linux                 | `.deb`, `.rpm`, or `.AppImage`     |
 
-```bash
-# macOS (Homebrew)
-brew install --cask oceancode-desktop
-# Windows (Scoop)
-scoop bucket add extras; scoop install extras/oceancode-desktop
-```
 
 #### ইনস্টলেশন ডিরেক্টরি (Installation Directory)
 

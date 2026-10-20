@@ -1,9 +1,9 @@
 <p align="center">
   <a href="https://github.com/ianimatethings12-stack/oceancode">
     <picture>
-      <source srcset="packages/console/app/src/asset/logo-ornate-dark.svg" media="(prefers-color-scheme: dark)">
-      <source srcset="packages/console/app/src/asset/logo-ornate-light.svg" media="(prefers-color-scheme: light)">
-      <img src="packages/console/app/src/asset/logo-ornate-light.svg" alt="OceanCode logo">
+      <source srcset="packages/web/src/assets/oceancode-logo-dark.svg" media="(prefers-color-scheme: dark)">
+      <source srcset="packages/web/src/assets/oceancode-logo-light.svg" media="(prefers-color-scheme: light)">
+      <img src="packages/web/src/assets/oceancode-logo-light.svg" alt="OceanCode logo">
     </picture>
   </a>
 </p>
@@ -50,15 +50,10 @@
 curl -fsSL https://raw.githubusercontent.com/ianimatethings12-stack/oceancode/dev/install | bash
 
 # 패키지 매니저
-npm i -g oceancode@latest        # bun/pnpm/yarn 도 가능
-scoop install oceancode             # Windows
-choco install oceancode             # Windows
-brew install ianimatethings12-stack/oceancode # macOS 및 Linux (권장, 항상 최신)
-brew install oceancode              # macOS 및 Linux (공식 brew formula, 업데이트 빈도 낮음)
-sudo pacman -S oceancode            # Arch Linux (Stable)
-paru -S oceancode-bin               # Arch Linux (Latest from AUR)
-mise use -g oceancode               # 어떤 OS든
-nix run nixpkgs#oceancode           # 또는 github:ianimatethings12-stack/oceancode 로 최신 dev 브랜치
+npm install -g oceancode@latest
+bun add -g oceancode@latest
+pnpm add -g oceancode@latest
+yarn global add oceancode@latest
 ```
 
 > [!TIP]
@@ -66,7 +61,7 @@ nix run nixpkgs#oceancode           # 또는 github:ianimatethings12-stack/ocean
 
 ### 데스크톱 앱 (BETA)
 
-OceanCode 는 데스크톱 앱으로도 제공됩니다. [releases page](https://github.com/ianimatethings12-stack/oceancode/releases) 에서 직접 다운로드하거나 [oceancode.ai/download](https://github.com/ianimatethings12-stack/oceancode/releases) 를 이용하세요.
+OceanCode 는 데스크톱 앱으로도 제공됩니다. [releases page](https://github.com/ianimatethings12-stack/oceancode/releases) 에서 직접 다운로드하거나 [GitHub Releases](https://github.com/ianimatethings12-stack/oceancode/releases) 를 이용하세요.
 
 | 플랫폼                | 다운로드                           |
 | --------------------- | ---------------------------------- |
@@ -75,12 +70,6 @@ OceanCode 는 데스크톱 앱으로도 제공됩니다. [releases page](https:/
 | Windows               | `oceancode-desktop-windows-x64.exe` |
 | Linux                 | `.deb`, `.rpm`, 또는 AppImage      |
 
-```bash
-# macOS (Homebrew)
-brew install --cask oceancode-desktop
-# Windows (Scoop)
-scoop bucket add extras; scoop install extras/oceancode-desktop
-```
 
 #### 설치 디렉터리
 
