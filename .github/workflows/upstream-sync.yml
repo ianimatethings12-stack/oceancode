@@ -1,0 +1,135 @@
+name: upstream-sync
+
+on:
+  schedule:
+    # 21:30 UTC = 3:00 AM IST (India Standard Time) every day
+    - cron: "30 21 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: upstream-sync
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.4.2
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Fetch Upstream Tags & Commits
+        run: |
+          git remote add upstream https://github.com/anomalyco/opencode.git || git remote set-url upstream https://github.com/anomalyco/opencode.git
+          git fetch upstream --tags
+
+      - name: Check for New Upstream Release
+        id: check_release
+        run: |
+          LATEST_TAG=$(git tag -l "v[0-9]*" --sort=-v:refname | head -n 1)
+          echo "Latest upstream tag: $LATEST_TAG"
+          echo "tag=$LATEST_TAG" >> "$GITHUB_OUTPUT"
+          
+          # Check if this tag is already merged into HEAD
+          if git merge-base --is-ancestor "$LATEST_TAG" HEAD 2>/dev/null; then
+            echo "Current branch already contains $LATEST_TAG. Up to date!"
+            echo "needs_sync=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "New upstream release detected: $LATEST_TAG"
+            echo "needs_sync=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create Sync Branch and Merge Upstream
+        if: steps.check_release.outputs.needs_sync == 'true'
+        id: sync_branch
+        run: |
+          TAG="${{ steps.check_release.outputs.tag }}"
+          SYNC_BRANCH="sync/upstream-${TAG}"
+          echo "branch=$SYNC_BRANCH" >> "$GITHUB_OUTPUT"
+          
+          # Create and switch to sync branch
+          git checkout -b "$SYNC_BRANCH"
+          
+          # Attempt merge
+          if git merge "$TAG" -m "chore(sync): merge upstream $TAG" --allow-unrelated-histories; then
+            echo "merged=clean" >> "$GITHUB_OUTPUT"
+          else
+            echo "Merge had conflicts, will resolve with rebrand pipeline"
+            echo "merged=conflicts" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Apply OceanCode Rebrand Engine
+        if: steps.check_release.outputs.needs_sync == 'true'
+        run: |
+          bun install
+          bun script/rebrand.ts --apply
+          bun script/rebrand.ts --check --json || true
+
+      - name: Run Typecheck
+        if: steps.check_release.outputs.needs_sync == 'true'
+        id: typecheck
+        run: |
+          if bun typecheck; then
+            echo "status=passed" >> "$GITHUB_OUTPUT"
+          else
+            echo "status=failed" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit and Push Sync Branch
+        if: steps.check_release.outputs.needs_sync == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ steps.check_release.outputs.tag }}"
+          SYNC_BRANCH="${{ steps.sync_branch.outputs.branch }}"
+          
+          if [ -n "$(git status --porcelain)" ]; then
+            git add -A
+            git commit -m "chore(rebrand): apply OceanCode branding for upstream $TAG"
+          fi
+          
+          git push origin "$SYNC_BRANCH" --force
+
+      - name: Create or Update Pull Request
+        if: steps.check_release.outputs.needs_sync == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ steps.check_release.outputs.tag }}"
+          SYNC_BRANCH="${{ steps.sync_branch.outputs.branch }}"
+          TC_STATUS="${{ steps.typecheck.outputs.status }}"
+          
+          EXISTING_PR=$(gh pr list --head "$SYNC_BRANCH" --json number -q '.[0].number' 2>/dev/null || true)
+          
+          PR_TITLE="feat(sync): sync upstream ${TAG} with OceanCode branding"
+          PR_BODY="### Automated Daily Upstream Sync
+
+- **Upstream Tag**: \`${TAG}\`
+- **Branding Pipeline**: \`bun script/rebrand.ts --apply\` executed
+- **Typecheck Status**: \`${TC_STATUS}\`
+
+This PR brings OceanCode up to date with upstream release \`${TAG}\` while preserving OceanCode naming, themes, and configuration paths.
+
+*Created automatically by [Daily Upstream Sync](.github/workflows/upstream-sync.yml) at 3:00 AM IST.*"
+
+          if [ -z "$EXISTING_PR" ]; then
+            gh pr create --title "$PR_TITLE" --body "$PR_BODY" --head "$SYNC_BRANCH" --base dev
+          else
+            gh pr edit "$EXISTING_PR" --title "$PR_TITLE" --body "$PR_BODY"
+          fi
