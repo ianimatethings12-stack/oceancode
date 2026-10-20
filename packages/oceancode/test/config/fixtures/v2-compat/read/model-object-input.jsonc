@@ -1,0 +1,4 @@
+{
+  "$schema": "https://raw.githubusercontent.com/ianimatethings12-stack/oceancode/dev/config.schema.json",
+  "model": { "providerID": "anthropic", "model": "claude-sonnet", "variant": "fast" },
+}

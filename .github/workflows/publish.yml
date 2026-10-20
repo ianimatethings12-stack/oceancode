@@ -34,7 +34,7 @@ permissions:
 jobs:
   version:
     runs-on: blacksmith-4vcpu-ubuntu-2404
-    if: github.repository == 'anomalyco/opencode'
+    if: github.repository == 'ianimatethings12-stack/oceancode'
     steps:
       - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
         with:
@@ -51,7 +51,7 @@ jobs:
 
       - name: Install OpenCode
         if: inputs.bump || inputs.version
-        run: bun i -g opencode-ai
+        run: bun i -g oceancode
 
       - id: version
         run: |
@@ -61,7 +61,7 @@ jobs:
           OPENCODE_BUMP: ${{ inputs.bump }}
           OPENCODE_VERSION: ${{ inputs.version }}
           OPENCODE_API_KEY: ${{ secrets.OPENCODE_API_KEY }}
-          GH_REPO: ${{ (github.ref_name == 'beta' && 'anomalyco/opencode-beta') || github.repository }}
+          GH_REPO: ${{ (github.ref_name == 'beta' && 'ianimatethings12-stack/oceancode-beta') || github.repository }}
     outputs:
       version: ${{ steps.version.outputs.version }}
       release: ${{ steps.version.outputs.release }}
@@ -71,7 +71,7 @@ jobs:
   build-cli:
     needs: version
     runs-on: blacksmith-4vcpu-ubuntu-2404
-    if: github.repository == 'anomalyco/opencode'
+    if: github.repository == 'ianimatethings12-stack/oceancode'
     steps:
       - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
         with:
@@ -89,7 +89,7 @@ jobs:
       - name: Build
         id: build
         run: |
-          ./packages/opencode/script/build.ts ${{ (github.ref_name == 'beta' && '--sourcemaps') || '' }}
+          ./packages/oceancode/script/build.ts ${{ (github.ref_name == 'beta' && '--sourcemaps') || '' }}
           ./packages/cli/script/build.ts ${{ (github.ref_name == 'beta' && '--sourcemaps') || '' }}
         env:
           OPENCODE_VERSION: ${{ needs.version.outputs.version }}
@@ -99,15 +99,15 @@ jobs:
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: opencode-cli
+          name: oceancode-cli
           path: |
-            packages/opencode/dist/opencode-darwin*
-            packages/opencode/dist/opencode-linux*
+            packages/oceancode/dist/opencode-darwin*
+            packages/oceancode/dist/opencode-linux*
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: opencode-cli-windows
-          path: packages/opencode/dist/opencode-windows*
+          name: oceancode-cli-windows
+          path: packages/oceancode/dist/opencode-windows*
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
@@ -122,7 +122,7 @@ jobs:
       - build-cli
       - version
     runs-on: macos-26
-    if: github.repository == 'anomalyco/opencode'
+    if: github.repository == 'ianimatethings12-stack/oceancode'
     steps:
       - uses: actions/checkout@f43a0e5ff2bd294095638e18286ca9a3d1956744 # v3.6.0
 
@@ -134,8 +134,8 @@ jobs:
 
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-          name: opencode-cli
-          path: packages/opencode/dist
+          name: oceancode-cli
+          path: packages/oceancode/dist
 
       - name: Setup git committer
         id: committer
@@ -153,13 +153,13 @@ jobs:
           fi
 
           for name in opencode-darwin-arm64 opencode-darwin-x64 opencode-darwin-x64-baseline; do
-            file="packages/opencode/dist/$name/bin/opencode"
+            file="packages/oceancode/dist/$name/bin/opencode"
             chmod +x "$file"
             codesign \
               --force \
               --timestamp \
               --options runtime \
-              --entitlements packages/opencode/script/entitlements.plist \
+              --entitlements packages/oceancode/script/entitlements.plist \
               --sign "$identity" \
               "$file"
             codesign --verify --deep --strict --verbose=4 "$file"
@@ -167,10 +167,10 @@ jobs:
           done
 
       - name: Smoke test signed binary
-        run: ./packages/opencode/dist/opencode-darwin-arm64/bin/opencode --version
+        run: ./packages/oceancode/dist/opencode-darwin-arm64/bin/opencode --version
 
       - name: Repack macOS CLI archives
-        working-directory: packages/opencode/dist
+        working-directory: packages/oceancode/dist
         run: |
           for name in opencode-darwin-arm64 opencode-darwin-x64 opencode-darwin-x64-baseline; do
             rm -f "$name.zip"
@@ -183,20 +183,20 @@ jobs:
           GH_TOKEN: ${{ steps.committer.outputs.token }}
         run: |
           gh release upload "v${{ needs.version.outputs.version }}" \
-            packages/opencode/dist/opencode-darwin-arm64.zip \
-            packages/opencode/dist/opencode-darwin-x64.zip \
-            packages/opencode/dist/opencode-darwin-x64-baseline.zip \
+            packages/oceancode/dist/opencode-darwin-arm64.zip \
+            packages/oceancode/dist/opencode-darwin-x64.zip \
+            packages/oceancode/dist/opencode-darwin-x64-baseline.zip \
             --clobber \
             --repo "${{ needs.version.outputs.repo }}"
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: opencode-cli-signed-macos
+          name: oceancode-cli-signed-macos
           path: |
-            packages/opencode/dist/opencode-darwin-arm64
-            packages/opencode/dist/opencode-darwin-x64
-            packages/opencode/dist/opencode-darwin-x64-baseline
-            packages/opencode/dist/opencode-darwin-*.zip
+            packages/oceancode/dist/opencode-darwin-arm64
+            packages/oceancode/dist/opencode-darwin-x64
+            packages/oceancode/dist/opencode-darwin-x64-baseline
+            packages/oceancode/dist/opencode-darwin-*.zip
           if-no-files-found: error
 
   sign-cli-windows:
@@ -204,7 +204,7 @@ jobs:
       - build-cli
       - version
     runs-on: blacksmith-4vcpu-windows-2025
-    if: github.repository == 'anomalyco/opencode'
+    if: github.repository == 'ianimatethings12-stack/oceancode'
     env:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
@@ -217,8 +217,8 @@ jobs:
 
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-          name: opencode-cli-windows
-          path: packages/opencode/dist
+          name: oceancode-cli-windows
+          path: packages/oceancode/dist
 
       - name: Setup git committer
         id: committer
@@ -271,7 +271,7 @@ jobs:
           }
 
       - name: Repack Windows CLI archives
-        working-directory: packages/opencode/dist
+        working-directory: packages/oceancode/dist
         shell: pwsh
         run: |
           Compress-Archive -Path "opencode-windows-arm64\bin\*" -DestinationPath "opencode-windows-arm64.zip" -Force
@@ -293,16 +293,16 @@ jobs:
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: opencode-cli-signed-windows
+          name: oceancode-cli-signed-windows
           path: |
-            packages/opencode/dist/opencode-windows-arm64
-            packages/opencode/dist/opencode-windows-x64
-            packages/opencode/dist/opencode-windows-x64-baseline
+            packages/oceancode/dist/opencode-windows-arm64
+            packages/oceancode/dist/opencode-windows-x64
+            packages/oceancode/dist/opencode-windows-x64-baseline
 
   build-electron:
     needs:
       - version
-    if: github.repository == 'anomalyco/opencode'
+    if: github.repository == 'ianimatethings12-stack/oceancode'
     continue-on-error: false
     env:
       AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
@@ -441,10 +441,10 @@ jobs:
         run: |
           if [[ "${{ matrix.settings.target }}" == "x86_64-apple-darwin" ]]; then
             APP_DIR="mac"
-            OUT_NAME="opencode-desktop-mac-x64.app.tar.gz"
+            OUT_NAME="oceancode-desktop-mac-x64.app.tar.gz"
           elif [[ "${{ matrix.settings.target }}" == "aarch64-apple-darwin" ]]; then
             APP_DIR="mac-arm64"
-            OUT_NAME="opencode-desktop-mac-arm64.app.tar.gz"
+            OUT_NAME="oceancode-desktop-mac-arm64.app.tar.gz"
           else
             echo "Unknown macOS target: ${{ matrix.settings.target }}"
             exit 1
@@ -463,7 +463,7 @@ jobs:
           $files = @()
           $files += Get-ChildItem "${{ github.workspace }}\packages\desktop\dist\*.exe" | Select-Object -ExpandProperty FullName
           $files += Get-ChildItem "${{ github.workspace }}\packages\desktop\dist\*unpacked\*.exe" | Select-Object -ExpandProperty FullName
-          $files += Get-ChildItem "${{ github.workspace }}\packages\desktop\dist\*unpacked\resources\opencode-cli.exe" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName
+          $files += Get-ChildItem "${{ github.workspace }}\packages\desktop\dist\*unpacked\resources\oceancode-cli.exe" -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName
 
           foreach ($file in $files | Select-Object -Unique) {
             $sig = Get-AuthenticodeSignature $file
@@ -474,7 +474,7 @@ jobs:
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: opencode-desktop-${{ matrix.settings.target }}
+          name: oceancode-desktop-${{ matrix.settings.target }}
           path: packages/desktop/dist/*
 
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
@@ -517,26 +517,26 @@ jobs:
 
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-          name: opencode-cli
-          path: packages/opencode/dist
+          name: oceancode-cli
+          path: packages/oceancode/dist
 
       - name: Remove unsigned macOS CLI binaries
-        run: rm -rf packages/opencode/dist/opencode-darwin*
+        run: rm -rf packages/oceancode/dist/opencode-darwin*
 
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-          name: opencode-cli-signed-macos
-          path: packages/opencode/dist
+          name: oceancode-cli-signed-macos
+          path: packages/oceancode/dist
 
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-          name: opencode-cli-windows
-          path: packages/opencode/dist
+          name: oceancode-cli-windows
+          path: packages/oceancode/dist
 
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-          name: opencode-cli-signed-windows
-          path: packages/opencode/dist
+          name: oceancode-cli-signed-windows
+          path: packages/oceancode/dist
 
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
@@ -552,7 +552,7 @@ jobs:
       - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         if: needs.version.outputs.release
         with:
-          pattern: opencode-desktop-*
+          pattern: oceancode-desktop-*
           path: /tmp/desktop
           merge-multiple: true
 

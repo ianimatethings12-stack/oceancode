@@ -131,6 +131,8 @@ export const Provider = Schema.Struct({
 
 export type Provider = Schema.Schema.Type<typeof Provider>
 
+const Catalog = Schema.Record(Schema.String, Provider)
+
 export const Event = ModelsDev.Event
 
 declare const OPENCODE_MODELS_DEV: Record<string, Provider> | undefined
@@ -147,21 +149,14 @@ const layer = Layer.effect(
   Effect.gen(function* () {
     const fs = yield* FSUtil.Service
     const events = yield* EventV2.Service
-    const http = HttpClient.filterStatusOk(
-      (yield* HttpClient.HttpClient).pipe(
-        HttpClient.retryTransient({
-          retryOn: "errors-and-responses",
-          times: 2,
-          schedule: Schedule.exponential(200).pipe(Schedule.jittered),
-        }),
-      ),
-    )
+    const client = yield* HttpClient.HttpClient
 
     const source = Flag.OPENCODE_MODELS_URL || "https://models.opencode.ai"
     const filepath = path.join(
       Global.Path.cache,
       source === "https://models.opencode.ai" ? "models.json" : `models-${Hash.fast(source)}.json`,
     )
+    const etagPath = `${filepath}.etag`
     const ttl = Duration.minutes(5)
     const lockKey = `models-dev:${filepath}`
 
@@ -172,27 +167,14 @@ const layer = Layer.effect(
       return Date.now() - mtime < Duration.toMillis(ttl)
     })
 
-    const fetchApi = Effect.fn("ModelsDev.fetchApi")(function* () {
-      return yield* HttpClientRequest.get(`${source}/api.json`).pipe(
-        HttpClientRequest.setHeader("User-Agent", USER_AGENT),
-        http.execute,
-        Effect.flatMap((res) => res.text),
-        Effect.timeout("10 seconds"),
-      )
-    })
-
     const loadFromDisk = fs.readJson(Flag.OPENCODE_MODELS_PATH ?? filepath).pipe(
-      Effect.catch((error) => {
-        if (
-          Flag.OPENCODE_MODELS_PATH === undefined &&
-          error._tag === "FileSystemError" &&
-          error.method === "readJson"
-        ) {
+      Effect.map((value) => Option.getOrUndefined(Schema.decodeUnknownOption(Catalog)(value))),
+      Effect.catch(() => {
+        if (Flag.OPENCODE_MODELS_PATH === undefined) {
           return fs.remove(filepath, { force: true }).pipe(Effect.ignore, Effect.as(undefined))
         }
         return Effect.succeed(undefined)
       }),
-      Effect.map((v) => v as Record<string, Provider> | undefined),
     )
 
     const loadSnapshot = Effect.sync(() =>
@@ -200,7 +182,23 @@ const layer = Layer.effect(
     )
 
     const fetchAndWrite = Effect.fn("ModelsDev.fetchAndWrite")(function* () {
-      const text = yield* fetchApi()
+      const etag = yield* fs.readFileStringSafe(etagPath).pipe(Effect.catch(() => Effect.succeed(undefined)))
+      const response = yield* client.execute(
+        HttpClientRequest.get(`${source}/api.json`).pipe(
+          HttpClientRequest.setHeaders({
+            "User-Agent": USER_AGENT,
+            ...(etag ? { "If-None-Match": etag } : {}),
+          }),
+        ),
+      )
+      if (response.status === 304) return undefined
+      if (response.status < 200 || response.status >= 300) {
+        return yield* Effect.fail(new Error(`models.dev returned ${response.status}`))
+      }
+      const text = yield* response.text
+      // Validate before replacing the cache so a truncated or malformed
+      // response cannot poison the next startup.
+      const data = yield* Schema.decodeUnknownEffect(Schema.fromJsonString(Catalog))(text)
       const tempfile = `${filepath}.${process.pid}.${Date.now()}.tmp`
       yield* fs.writeWithDirs(tempfile, text).pipe(
         Effect.andThen(fs.rename(tempfile, filepath)),
@@ -211,35 +209,16 @@ const layer = Layer.effect(
           }),
         ),
       )
-      return text
+      const etagHeader = response.headers["etag"] ?? response.headers["ETag"]
+      if (etagHeader) yield* fs.writeWithDirs(etagPath, etagHeader).pipe(Effect.ignore)
+      return data
     })
 
     const populate = Effect.gen(function* () {
-      const fromDisk = yield* loadFromDisk
-      // An explicit path is a caller-owned catalog, and the fetch-disable flag
-      // is used by tests/offline runs; both should bypass network freshness.
-      if (Flag.OPENCODE_MODELS_PATH || Flag.OPENCODE_DISABLE_MODELS_FETCH) {
-        return fromDisk ?? (yield* loadSnapshot) ?? {}
-      }
-      // Prefer a fresh cache, but fetch before building the first catalog when
-      // the cache is missing or stale so the model picker starts from live data.
-      if (fromDisk && (yield* fresh())) return fromDisk
-      // Flock is cross-process: concurrent opencode CLIs can race on this cache file.
-      const current = yield* Effect.scoped(
-        Effect.gen(function* () {
-          yield* Flock.effect(lockKey)
-          // Re-check under the lock: another process may have refreshed between
-          // our outer check and lock acquisition.
-          if (yield* fresh()) {
-            const latest = yield* loadFromDisk
-            if (latest) return latest
-          }
-          const text = yield* fetchAndWrite()
-          return JSON.parse(text) as Record<string, Provider>
-        }),
-      ).pipe(Effect.catch(() => Effect.succeed(undefined)))
-      if (current) return current
-      return fromDisk ?? (yield* loadSnapshot) ?? {}
+      // Do not block startup on the multi-megabyte catalog. The cached copy or
+      // bundled snapshot is enough to render the first picker; the refresh
+      // loop publishes catalog.updated as soon as newer data is available.
+      return (yield* loadFromDisk) ?? (yield* loadSnapshot) ?? ({} as Record<string, Provider>)
     }).pipe(Effect.withSpan("ModelsDev.populate"), Effect.orDie)
 
     const [cachedGet, invalidate] = yield* Effect.cachedInvalidateWithTTL(populate, Duration.infinity)
@@ -254,7 +233,8 @@ const layer = Layer.effect(
           // Re-check under the lock: another process may have refreshed between
           // our outer check and lock acquisition.
           if (!force && (yield* fresh())) return
-          yield* fetchAndWrite()
+          const data = yield* fetchAndWrite()
+          if (!data) return
           yield* invalidate
           yield* events.publish(Event.Refreshed, {})
         }),

@@ -46,19 +46,14 @@
 ### Installation
 
 ```bash
-# YOLO
+# Install script
 curl -fsSL https://raw.githubusercontent.com/ianimatethings12-stack/oceancode/dev/install | bash
 
 # Package managers
-npm i -g oceancode@latest        # or bun/pnpm/yarn
-scoop install oceancode             # Windows
-choco install oceancode             # Windows
-brew install ianimatethings12-stack/oceancode # macOS and Linux (recommended, always up to date)
-brew install oceancode              # macOS and Linux (official brew formula, updated less)
-sudo pacman -S oceancode            # Arch Linux (Stable)
-paru -S oceancode-bin               # Arch Linux (Latest from AUR)
-mise use -g oceancode               # Any OS
-nix run nixpkgs#oceancode           # or github:ianimatethings12-stack/oceancode for latest dev branch
+npm install -g oceancode@latest
+bun add -g oceancode@latest
+pnpm add -g oceancode@latest
+yarn global add oceancode@latest
 ```
 
 > [!TIP]
@@ -66,21 +61,16 @@ nix run nixpkgs#oceancode           # or github:ianimatethings12-stack/oceancode
 
 ### Desktop App (BETA)
 
-OceanCode is also available as a desktop application. Download directly from the [releases page](https://github.com/ianimatethings12-stack/oceancode/releases) or [oceancode.ai/download](https://github.com/ianimatethings12-stack/oceancode/releases).
+OceanCode is also available as a desktop application. Download the unsigned v0.1 build from the [releases page](https://github.com/ianimatethings12-stack/oceancode/releases).
 
-| Platform              | Download                           |
-| --------------------- | ---------------------------------- |
+| Platform              | Download                            |
+| --------------------- | ----------------------------------- |
 | macOS (Apple Silicon) | `oceancode-desktop-mac-arm64.dmg`   |
 | macOS (Intel)         | `oceancode-desktop-mac-x64.dmg`     |
 | Windows               | `oceancode-desktop-windows-x64.exe` |
-| Linux                 | `.deb`, `.rpm`, or `.AppImage`     |
+| Linux                 | `.deb`, `.rpm`, or `.AppImage`      |
 
-```bash
-# macOS (Homebrew)
-brew install --cask oceancode-desktop
-# Windows (Scoop)
-scoop bucket add extras; scoop install extras/oceancode-desktop
-```
+v0.1 desktop builds are unsigned. macOS may require right-click → Open, and Windows may show a SmartScreen warning.
 
 #### Installation Directory
 

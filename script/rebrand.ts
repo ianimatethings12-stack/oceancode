@@ -16,7 +16,7 @@ const EXCLUDES = new Set([
   ".turbo",
   ".sst",
   ".next",
-  ".opencode",
+  ".oceancode",
   "node_modules",
   "dist",
   "build",
@@ -208,7 +208,7 @@ const RULES: Rule[] = [
   {
     name: "npm-shield",
     scope: ["docs"],
-    pattern: /img\.shields\.io\/npm\/v\/opencode-ai/g,
+    pattern: /img\.shields\.io\/npm\/v\/oceancode/g,
     replacement: "img.shields.io/npm/v/oceancode",
   },
 
@@ -228,7 +228,7 @@ const RULES: Rule[] = [
   {
     name: "dot-opencode",
     scope: ["code", "docs", "ui", "assets"],
-    pattern: /\.opencode\b/g,
+    pattern: /\.oceancode\b/g,
     replacement: ".oceancode",
   },
 
@@ -244,7 +244,7 @@ const RULES: Rule[] = [
   {
     name: "desktop-app-id",
     scope: ["code", "docs", "ui"],
-    pattern: /ai\.opencode\.desktop/g,
+    pattern: /ai\.oceancode\.desktop/g,
     replacement: "ai.oceancode.desktop",
   },
   {
@@ -422,11 +422,11 @@ const FORBIDDEN = [
   /https:\/\/opencode\.ai\/docs/,
   /https:\/\/opencode\.ai\/discord/,
   /https:\/\/opencode\.ai\/download/,
-  /ai\.opencode\.desktop/,
-  /opencode-desktop/,
-  /opencode-ai@/,
-  /npm install -g opencode-ai/,
-  /bun i -g opencode-ai/,
+  /ai\.oceancode\.desktop/,
+  /oceancode-desktop/,
+  /oceancode@/,
+  /npm install -g oceancode/,
+  /bun i -g oceancode/,
 ]
 
 const REQUIRED = [

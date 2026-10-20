@@ -73,20 +73,9 @@ You can also install it with the following commands:
 
   </Tabs>
 
-- **Using Homebrew on macOS and Linux**
+- **Using Homebrew, Chocolatey, Scoop, Arch, or Nix**
 
-  ```bash
-  brew install ianimatethings12-stack/oceancode
-  ```
-
-  > We recommend using the OceanCode tap for the most up to date releases. The official `brew install oceancode` formula is maintained by the Homebrew team and is updated less frequently.
-
-- **Installing on Arch Linux**
-
-  ```bash
-  sudo pacman -S oceancode           # Arch Linux (Stable)
-  paru -S oceancode-bin              # Arch Linux (Latest from AUR)
-  ```
+  These channels are not maintained for OceanCode v0.1. Use npm, Bun, pnpm, Yarn, the install script, or the GitHub Releases page.
 
 #### Windows
 
@@ -94,37 +83,17 @@ You can also install it with the following commands:
 For the best experience on Windows, we recommend using [Windows Subsystem for Linux (WSL)](/docs/windows-wsl). It provides better performance and full compatibility with OceanCode's features.
 :::
 
-- **Using Chocolatey**
-
-  ```bash
-  choco install oceancode
-  ```
-
-- **Using Scoop**
-
-  ```bash
-  scoop install oceancode
-  ```
-
 - **Using NPM**
 
   ```bash
   npm install -g oceancode
   ```
 
-- **Using Mise**
+- **Using Bun**
 
   ```bash
-  mise use -g github:ianimatethings12-stack/oceancode
+  bun add -g oceancode
   ```
-
-- **Using Docker**
-
-  ```bash
-  docker run -it --rm ghcr.io/ianimatethings12-stack/oceancode
-  ```
-
-Support for installing OceanCode on Windows using Bun is currently in progress.
 
 You can also grab the binary from the [Releases](https://github.com/ianimatethings12-stack/oceancode/releases).
 
@@ -138,7 +107,7 @@ If you are new to using LLM providers, we recommend using [OpenCode Zen](/docs/z
 It's a curated list of models that have been tested and verified by the OceanCode
 team.
 
-1. Run the `/connect` command in the TUI, select oceancode, and head to [oceancode.ai/auth](https://opencode.ai/auth).
+1. Run the `/connect` command in the TUI, select OceanCode, and head to [opencode.ai/auth](https://opencode.ai/auth).
 
    ```txt
    /connect

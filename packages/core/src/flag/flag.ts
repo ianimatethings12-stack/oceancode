@@ -1,4 +1,5 @@
 import { Config } from "effect"
+import "../env"
 
 export function truthy(key: string) {
   const value = process.env[key]?.toLowerCase()

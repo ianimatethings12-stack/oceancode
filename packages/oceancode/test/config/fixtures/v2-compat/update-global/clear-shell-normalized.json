@@ -1,0 +1,5 @@
+{
+  "$schema": "https://raw.githubusercontent.com/ianimatethings12-stack/oceancode/dev/config.schema.json",
+  "model": "example/demo",
+  "snapshot": false
+}

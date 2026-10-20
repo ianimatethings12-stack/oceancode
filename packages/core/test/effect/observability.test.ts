@@ -48,7 +48,7 @@ describe("resource", () => {
       "service.namespace": "anomalyco",
     })
     expect(resource().attributes["service.instance.id"]).not.toBe("override")
-    expect(resource().attributes["opencode.run"]).toMatch(/^[0-9a-f]{8}$/)
+    expect(resource().attributes["oceancode.run"]).toMatch(/^[0-9a-f]{8}$/)
   })
 })
 

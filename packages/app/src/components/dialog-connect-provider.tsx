@@ -207,7 +207,7 @@ function ProviderPicker(props: {
           <ProviderIcon data-slot="list-item-extra-icon" id={i.id} />
           <span>{i.name}</span>
           <Show when={i.id === "opencode"}>
-            <div class="text-14-regular text-text-weak">{language.t("dialog.provider.opencode.tagline")}</div>
+            <div class="text-14-regular text-text-weak">{language.t("dialog.provider.oceancode.tagline")}</div>
           </Show>
           <Show when={i.id === CUSTOM_ID}>
             <Tag>{language.t("settings.providers.tag.custom")}</Tag>
@@ -338,7 +338,7 @@ function ProviderPickerV2(props: {
                           <span class="min-w-0 truncate font-[440] text-v2-text-text-muted">
                             {language.t(
                               provider.id === "opencode"
-                                ? "dialog.provider.opencode.tagline"
+                                ? "dialog.provider.oceancode.tagline"
                                 : "dialog.provider.opencodeGo.tagline",
                             )}
                           </span>
@@ -564,7 +564,7 @@ function ProviderConnection(props: {
           if (!alive.value) return
           if (props.provider === "opencode" && platform.platform === "desktop") {
             const url = new URL(x.data.url)
-            url.searchParams.set("client_id", "opencode-desktop")
+            url.searchParams.set("client_id", "oceancode-desktop")
             x.data.url = url.href
           }
           dispatch({ type: "auth.complete", authorization: x.data })
