@@ -29,6 +29,7 @@ const SKIP_FILES = new Set(["bun.lock", "package-lock.json", "pnpm-lock.yaml", "
 const SKIP_PATHS = [
   ".opencode",
   "script/rebrand.ts",
+  ".github/workflows/upstream-sync.yml",
   "packages/client/src/generated",
   "packages/client/src/generated-effect",
   "packages/sdk/js/src/gen",
