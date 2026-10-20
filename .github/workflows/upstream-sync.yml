@@ -91,42 +91,59 @@ jobs:
             echo "status=failed" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Commit and Push Sync Branch
+      - name: Commit Sync Branch Changes
         if: steps.check_release.outputs.needs_sync == 'true'
+        run: |
+          TAG="${{ steps.check_release.outputs.tag }}"
+          if [ -n "$(git status --porcelain)" ]; then
+            git add -A
+            git commit -m "chore(rebrand): apply OceanCode branding for upstream $TAG"
+          fi
+
+      # ---------------------------------------------------------------
+      # Fully Autonomous: If Typecheck Passed -> Auto-merge directly to dev
+      # ---------------------------------------------------------------
+      - name: Auto-Merge Directly to dev (Zero Human Action)
+        if: steps.check_release.outputs.needs_sync == 'true' && steps.typecheck.outputs.status == 'passed'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG="${{ steps.check_release.outputs.tag }}"
           SYNC_BRANCH="${{ steps.sync_branch.outputs.branch }}"
+          echo "Typecheck passed! Auto-merging $SYNC_BRANCH directly into dev..."
           
-          if [ -n "$(git status --porcelain)" ]; then
-            git add -A
-            git commit -m "chore(rebrand): apply OceanCode branding for upstream $TAG"
-          fi
-          
-          git push origin "$SYNC_BRANCH" --force
+          git checkout dev
+          git merge "$SYNC_BRANCH" -m "feat(sync): automatically sync upstream $TAG with OceanCode branding"
+          git push origin dev
+          echo "Successfully auto-merged and pushed upstream $TAG to dev with zero manual intervention!"
 
-      - name: Create or Update Pull Request
-        if: steps.check_release.outputs.needs_sync == 'true'
+      # ---------------------------------------------------------------
+      # Safety Fallback: If Typecheck Failed -> Open an Action Required PR
+      # ---------------------------------------------------------------
+      - name: Open Fallback PR (Only If Typecheck Failed)
+        if: steps.check_release.outputs.needs_sync == 'true' && steps.typecheck.outputs.status != 'passed'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG="${{ steps.check_release.outputs.tag }}"
           SYNC_BRANCH="${{ steps.sync_branch.outputs.branch }}"
-          TC_STATUS="${{ steps.typecheck.outputs.status }}"
+          
+          git push origin "$SYNC_BRANCH" --force
           
           EXISTING_PR=$(gh pr list --head "$SYNC_BRANCH" --json number -q '.[0].number' 2>/dev/null || true)
           
-          PR_TITLE="feat(sync): sync upstream ${TAG} with OceanCode branding"
-          PR_BODY="### Automated Daily Upstream Sync
+          PR_TITLE="⚠️ [ACTION REQUIRED] Upstream ${TAG} sync needs manual review (Typecheck Failed)"
+          PR_BODY="### Automated Daily Upstream Sync - Attention Required
+
+Upstream release \`${TAG}\` was pulled and rebranded, but \`bun typecheck\` encountered compiler errors or breaking changes.
+
+To protect \`dev\`, this release was **not** auto-merged.
 
 - **Upstream Tag**: \`${TAG}\`
-- **Branding Pipeline**: \`bun script/rebrand.ts --apply\` executed
-- **Typecheck Status**: \`${TC_STATUS}\`
+- **Rebrand Pipeline**: Executed
+- **Typecheck Status**: \`FAILED\`
 
-This PR brings OceanCode up to date with upstream release \`${TAG}\` while preserving OceanCode naming, themes, and configuration paths.
-
-*Created automatically by [Daily Upstream Sync](.github/workflows/upstream-sync.yml) at 3:00 AM IST.*"
+Please review the branch \`${SYNC_BRANCH}\`, address the compiler errors, and merge when ready."
 
           if [ -z "$EXISTING_PR" ]; then
             gh pr create --title "$PR_TITLE" --body "$PR_BODY" --head "$SYNC_BRANCH" --base dev
