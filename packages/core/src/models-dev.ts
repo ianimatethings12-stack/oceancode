@@ -156,7 +156,6 @@ const layer = Layer.effect(
       Global.Path.cache,
       source === "https://models.opencode.ai" ? "models.json" : `models-${Hash.fast(source)}.json`,
     )
-    const legacyFilepath = path.join(path.dirname(Global.Path.cache), "opencode", "models.json")
     const etagPath = `${filepath}.etag`
     const ttl = Duration.minutes(5)
     const lockKey = `models-dev:${filepath}`
@@ -176,12 +175,7 @@ const layer = Layer.effect(
 
     const loadFromDisk = Effect.gen(function* () {
       if (Flag.OPENCODE_MODELS_PATH) return yield* readCatalog(Flag.OPENCODE_MODELS_PATH)
-      const current = yield* readCatalog(filepath)
-      if (current) return current
-      // Existing OpenCode installs may still have the catalog in the legacy
-      // cache directory. Read it once; the background refresh writes the new
-      // location before the next launch.
-      return yield* readCatalog(legacyFilepath)
+      return yield* readCatalog(filepath)
     })
 
     const loadSnapshot = Effect.sync(() =>
