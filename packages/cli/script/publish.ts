@@ -19,6 +19,9 @@ async function published(name: string, version: string) {
 
 async function publish(dir: string, name: string, version: string) {
   if (process.platform !== "win32") await $`chmod -R 755 .`.cwd(dir)
+  for (const file of new Bun.Glob("*.tgz").scanSync({ cwd: dir })) {
+    await rm(path.join(dir, file), { force: true })
+  }
   const exists = !dryRun && (await published(name, version))
   if (exists) console.log(`already published ${name}@${version}`)
   // Keep local tarballs available to downstream publishers when retrying a release.
@@ -50,26 +53,36 @@ async function publishDistribution(input: {
 
   await $`mkdir -p ${input.root}/${input.name}/bin`
   await $`cp ./script/postinstall.mjs ${input.root}/${input.name}/postinstall.mjs`
-  await Bun.file(`${input.root}/${input.name}/bin/${input.command}.exe`).write(
-    [
-      `echo "Error: ${input.name}'s postinstall script was not run." >&2`,
-      'echo "" >&2',
-      'echo "This occurs when installation scripts are disabled." >&2',
-      'echo "Run the package postinstall script or reinstall with scripts enabled." >&2',
-      "exit 1",
-      "",
-    ].join("\n"),
-  )
+  await $`cp ./bin/oceancode.cjs ${input.root}/${input.name}/bin/oceancode.cjs`
+  await $`cp ./bin/ocean.cjs ${input.root}/${input.name}/bin/ocean.cjs`
+  await $`cp ./bin/opencode.cjs ${input.root}/${input.name}/bin/opencode.cjs`
+  await $`cp ../../README.md ${input.root}/${input.name}/README.md`
+  await $`cp ../../LICENSE ${input.root}/${input.name}/LICENSE`
+
+  const placeholder = [
+    `echo "Error: ${input.name}'s postinstall script was not run." >&2`,
+    'echo "" >&2',
+    'echo "This occurs when installation scripts are disabled." >&2',
+    'echo "Run the package postinstall script or reinstall with scripts enabled." >&2',
+    "exit 1",
+    "",
+  ].join("\n")
+  await Bun.file(`${input.root}/${input.name}/bin/${input.command}.exe`).write(placeholder)
+  if (input.legacyCommand) {
+    await Bun.file(`${input.root}/${input.name}/bin/${input.legacyCommand}.exe`).write(placeholder)
+  }
   await Bun.file(`${input.root}/${input.name}/package.json`).write(
     JSON.stringify(
       {
         name: input.name,
+        description: "OceanCode - an AI coding agent for the terminal, desktop, and IDE",
+        homepage: "https://github.com/ianimatethings12-stack/oceancode",
         bin: {
-          [input.command]: `./bin/${input.command}.exe`,
-          ...(input.legacyCommand ? { [input.legacyCommand]: `./bin/${input.command}.exe` } : {}),
+          [input.command]: `./bin/${input.command}.cjs`,
+          ...(input.legacyCommand ? { [input.legacyCommand]: `./bin/${input.legacyCommand}.cjs` } : {}),
         },
-        ...(input.command !== input.binary ? { opencodeSourceBinary: input.binary } : {}),
         scripts: { postinstall: "node ./postinstall.mjs" },
+        files: ["bin", "postinstall.mjs", "README.md", "LICENSE"],
         version,
         license: pkg.license,
         repository: { type: "git", url: "git+https://github.com/ianimatethings12-stack/oceancode.git" },
@@ -84,52 +97,58 @@ async function publishDistribution(input: {
 
   await Promise.all(
     Object.entries(binaries).map(([name, version]) =>
-      publish(`${input.root}/${name.replace("@opencode/", "")}`, name, version),
+      publish(`${input.root}/${name.replace(/^@opencode\//, "")}`, name, version),
     ),
   )
   await publish(`${input.root}/${input.name}`, input.name, version)
-  const files = await UpdateArtifact.upload({
-    version,
-    files: await Promise.all(
-      Object.keys(binaries).map((name) =>
-        archive(
-          path.join(input.root, name.replace("@opencode/", ""), "bin"),
-          name.slice(input.packagePrefix.length),
-          input.binary,
-          input.root,
+  try {
+    if (process.env.CLOUDFLARE_API_TOKEN) {
+      const files = await UpdateArtifact.upload({
+        version,
+        files: await Promise.all(
+          Object.keys(binaries).map((name) =>
+            archive(
+              path.join(input.root, name.replace(/^@opencode\//, ""), "bin"),
+              name.slice(input.packagePrefix.length),
+              input.binary,
+              input.root,
+            ),
+          ),
         ),
-      ),
-    ),
-    dryRun,
-  })
-  const artifact = {
-    channel: Script.channel,
-    name: input.artifact,
-    distribution: "opencode",
-    version,
-    metadata: { files },
+        dryRun,
+      })
+      const artifact = {
+        channel: Script.channel,
+        name: input.artifact,
+        distribution: "opencode",
+        version,
+        metadata: { files },
+      }
+      if (dryRun) {
+        console.log(`dry-run artifact: ${JSON.stringify(artifact)}`)
+        return
+      }
+      await UpdateArtifact.publish({
+        channel: Script.channel,
+        name: input.artifact,
+        distribution: "npm",
+        version,
+        metadata: { package: input.name },
+      })
+      await UpdateArtifact.publish(artifact)
+    }
+  } catch (error) {
+    console.warn("Skipping update artifact:", error)
   }
-  if (dryRun) {
-    console.log(`dry-run artifact: ${JSON.stringify(artifact)}`)
-    return
-  }
-  await UpdateArtifact.publish({
-    channel: Script.channel,
-    name: input.artifact,
-    distribution: "npm",
-    version,
-    metadata: { package: input.name },
-  })
-  await UpdateArtifact.publish(artifact)
 }
 
 await publishDistribution({
   root,
-  name: pkg.name,
-  command: "opencode",
-  legacyCommand: "opencode2",
-  binary: "opencode",
-  packagePrefix: "@opencode/cli-",
+  name: "oceancode",
+  command: "oceancode",
+  legacyCommand: "ocean",
+  binary: "oceancode",
+  packagePrefix: "oceancode-",
   artifact: "cli",
 })
 if (Script.channel !== "latest" && existsSync(path.join(root, "node"))) {

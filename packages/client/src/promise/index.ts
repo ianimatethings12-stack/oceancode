@@ -1,7 +1,7 @@
-import type { OpenCode } from "./client.js"
+import type { OpenCode, OceanCode } from "./client.js"
 
 export * from "./generated/index.js"
-export { OpenCode } from "./client.js"
+export { OpenCode, OceanCode } from "./client.js"
 export type {
   AgentApi,
   CommandApi,
@@ -22,3 +22,4 @@ export type {
 } from "./api.js"
 export type { EventSubscribeOutput as OpenCodeEvent } from "./generated/types.js"
 export type OpenCodeClient = ReturnType<typeof OpenCode.make>
+export type OceanCodeClient = ReturnType<typeof OceanCode.make>

@@ -309,8 +309,8 @@ const RULES: Rule[] = [
   {
     name: "electron-store-workspace",
     scope: ["code"],
-    pattern: /opencode\.workspace\./g,
-    replacement: "oceancode.workspace.",
+    pattern: /opencode\.workspace\.dat/g,
+    replacement: "oceancode.workspace.dat",
   },
   {
     name: "electron-store-default",

@@ -110,18 +110,21 @@ function packageNames() {
 
 function copyBinary(source) {
   if (!fs.existsSync(source)) throw new Error(`Binary not found at ${source}`)
-  fs.mkdirSync(path.dirname(targetBinary), { recursive: true })
-  if (fs.existsSync(targetBinary)) {
+  for (const binRelPath of Object.values(packageJson.bin ?? {})) {
+    const target = path.resolve(directory, binRelPath)
+    fs.mkdirSync(path.dirname(target), { recursive: true })
+    if (fs.existsSync(target)) {
+      try {
+        fs.unlinkSync(target)
+      } catch {}
+    }
     try {
-      fs.unlinkSync(targetBinary)
-    } catch {}
+      fs.linkSync(source, target)
+    } catch {
+      fs.copyFileSync(source, target)
+    }
+    fs.chmodSync(target, 0o755)
   }
-  try {
-    fs.linkSync(source, targetBinary)
-  } catch {
-    fs.copyFileSync(source, targetBinary)
-  }
-  fs.chmodSync(targetBinary, 0o755)
 }
 
 function resolveBinary(name) {

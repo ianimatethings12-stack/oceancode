@@ -198,8 +198,8 @@ it.live(
           ],
         },
       )
-      const firstWorkspace = yield* oceancode.workspace.create({ provider: "memory" })
-      const secondWorkspace = yield* oceancode.workspace.create({ provider: "memory" })
+      const firstWorkspace = yield* opencode.workspace.create({ provider: "memory" })
+      const secondWorkspace = yield* opencode.workspace.create({ provider: "memory" })
       const first = yield* opencode.sessions.create({
         title: "First placement",
         location: Location.Ref.make({ directory: AbsolutePath.make(directory.path), workspaceID: firstWorkspace }),
