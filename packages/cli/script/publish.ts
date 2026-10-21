@@ -23,10 +23,29 @@ async function publish(dir: string, name: string, version: string) {
     await rm(path.join(dir, file), { force: true })
   }
   const exists = !dryRun && (await published(name, version))
-  if (exists) console.log(`already published ${name}@${version}`)
-  // Keep local tarballs available to downstream publishers when retrying a release.
+  if (exists) {
+    console.log(`already published ${name}@${version}`)
+    return
+  }
   await $`bun pm pack`.cwd(dir)
-  if (!exists && !dryRun) await $`npm publish *.tgz --access public --tag ${Script.channel}`.cwd(dir)
+  const tarball = new Bun.Glob("*.tgz").scanSync({ cwd: dir }).next().value
+  if (!tarball) throw new Error(`No tarball found in ${dir} after bun pm pack`)
+  if (!dryRun) {
+    let retries = 3
+    while (retries > 0) {
+      try {
+        console.log(`Uploading ${name}@${version} (${tarball})...`)
+        await $`npm publish ${tarball} --access public --tag ${Script.channel}`.cwd(dir)
+        console.log(`Successfully published ${name}@${version}`)
+        break
+      } catch (e) {
+        retries--
+        if (retries === 0) throw e
+        console.warn(`npm publish failed for ${name}, retrying (${retries} retries left)...`, e)
+        await Bun.sleep(5000)
+      }
+    }
+  }
 }
 
 async function publishDistribution(input: {
@@ -95,11 +114,9 @@ async function publishDistribution(input: {
     ),
   )
 
-  await Promise.all(
-    Object.entries(binaries).map(([name, version]) =>
-      publish(`${input.root}/${name.replace(/^@opencode\//, "")}`, name, version),
-    ),
-  )
+  for (const [name, version] of Object.entries(binaries)) {
+    await publish(`${input.root}/${name.replace(/^@opencode\//, "")}`, name, version)
+  }
   await publish(`${input.root}/${input.name}`, input.name, version)
   try {
     if (process.env.CLOUDFLARE_API_TOKEN) {
