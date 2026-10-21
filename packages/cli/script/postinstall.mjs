@@ -119,9 +119,11 @@ function copyBinary(source) {
       } catch {}
     }
     try {
-      fs.linkSync(source, target)
-    } catch {
       fs.copyFileSync(source, target)
+    } catch {
+      try {
+        fs.linkSync(source, target)
+      } catch {}
     }
     fs.chmodSync(target, 0o755)
   }

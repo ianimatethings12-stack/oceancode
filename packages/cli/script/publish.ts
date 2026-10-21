@@ -64,17 +64,10 @@ async function publishDistribution(input: {
     binaries[item.name] = item.version
   }
   console.log(input.name, "binaries", binaries)
-  const versions = new Set(Object.values(binaries))
-  if (versions.size > 1) throw new Error(`Binary package versions do not match for ${input.name}`)
-  const version = versions.values().next().value
-  if (!version) throw new Error(`No binary packages found for ${input.name}`)
-  if (version !== Script.version) throw new Error(`Expected ${Script.version}, got ${version} for ${input.name}`)
+  const version = Script.version
 
   await $`mkdir -p ${input.root}/${input.name}/bin`
   await $`cp ./script/postinstall.mjs ${input.root}/${input.name}/postinstall.mjs`
-  await $`cp ./bin/oceancode.cjs ${input.root}/${input.name}/bin/oceancode.cjs`
-  await $`cp ./bin/ocean.cjs ${input.root}/${input.name}/bin/ocean.cjs`
-  await $`cp ./bin/opencode.cjs ${input.root}/${input.name}/bin/opencode.cjs`
   await $`cp ../../README.md ${input.root}/${input.name}/README.md`
   await $`cp ../../LICENSE ${input.root}/${input.name}/LICENSE`
 
@@ -97,8 +90,8 @@ async function publishDistribution(input: {
         description: "OceanCode - an AI coding agent for the terminal, desktop, and IDE",
         homepage: "https://github.com/ianimatethings12-stack/oceancode",
         bin: {
-          [input.command]: `./bin/${input.command}.cjs`,
-          ...(input.legacyCommand ? { [input.legacyCommand]: `./bin/${input.legacyCommand}.cjs` } : {}),
+          [input.command]: `./bin/${input.command}.exe`,
+          ...(input.legacyCommand ? { [input.legacyCommand]: `./bin/${input.legacyCommand}.exe` } : {}),
         },
         scripts: { postinstall: "node ./postinstall.mjs" },
         files: ["bin", "postinstall.mjs", "README.md", "LICENSE"],
