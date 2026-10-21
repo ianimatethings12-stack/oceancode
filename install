@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
-APP=opencode
-SOURCE_APP=opencode
+APP=oceancode
+SOURCE_APP=oceancode
 
 MUTED='\033[0;2m'
 RED='\033[0;31m'
@@ -10,20 +10,20 @@ NC='\033[0m' # No Color
 
 usage() {
     cat <<EOF
-OpenCode Installer
+OceanCode Installer
 
 Usage: install.sh [options]
 
 Options:
     -h, --help              Display this help message
-    -v, --version <version> Install a specific version (e.g., 0.0.0-beta-17236)
+    -v, --version <version> Install a specific version (e.g., 2.1.1)
     -b, --binary <path>     Install from a local binary instead of downloading
         --no-modify-path    Don't modify shell config files (.zshrc, .bashrc, etc.)
 
 Examples:
-    curl -fsSL https://opencode.ai/v2/install | bash
-    curl -fsSL https://opencode.ai/v2/install | bash -s -- --version 0.0.0-beta-17236
-    ./install --binary /path/to/opencode
+    curl -fsSL https://raw.githubusercontent.com/ianimatethings12-stack/oceancode/main/install | bash
+    curl -fsSL https://raw.githubusercontent.com/ianimatethings12-stack/oceancode/main/install | bash -s -- --version 2.1.1
+    ./install --binary /path/to/oceancode
 EOF
 }
 
@@ -66,7 +66,15 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-INSTALL_DIR=$HOME/.opencode/bin
+if [ -n "${OCEANCODE_INSTALL_DIR:-}" ]; then
+  INSTALL_DIR="$OCEANCODE_INSTALL_DIR"
+elif [ -n "${XDG_BIN_DIR:-}" ]; then
+  INSTALL_DIR="$XDG_BIN_DIR"
+elif [ -d "$HOME/bin" ] || mkdir -p "$HOME/bin" 2>/dev/null; then
+  INSTALL_DIR="$HOME/bin"
+else
+  INSTALL_DIR="$HOME/.oceancode/bin"
+fi
 mkdir -p "$INSTALL_DIR"
 
 # If --binary is provided, skip all download/detection logic
@@ -174,29 +182,37 @@ else
         exit 1
     fi
 
-    package_scope="@opencode"
+    REPO="ianimatethings12-stack/oceancode"
     if [ -z "$requested_version" ]; then
-        metadata=$(curl -fsSL https://opencode.ai/update/api/latest/cli/npm || true)
-        specific_version=$(echo "$metadata" | sed -n 's/.*"version":"\([^"]*\)".*/\1/p')
-        package=$(echo "$metadata" | sed -n 's/.*"package":"\([^"]*\)".*/\1/p')
-
-        if [ -z "$specific_version" ] || [ -z "$package" ]; then
+        specific_version="$(curl -fsSL "https://api.github.com/repos/${REPO}/releases/latest" 2>/dev/null |
+            sed -n 's/.*"tag_name"[[:space:]]*:[[:space:]]*"v\{0,1\}\([^"]*\)".*/\1/p' |
+            head -n 1 || true)"
+        if [ -z "$specific_version" ]; then
+            specific_version="$(curl -fsSL "https://registry.npmjs.org/oceancode/latest" 2>/dev/null |
+                sed -n 's/.*"version"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' |
+                head -n 1 || true)"
+        fi
+        if [ -z "$specific_version" ]; then
             echo -e "${RED}Failed to fetch version information${NC}"
             exit 1
         fi
-        package_scope="${package%/cli}"
     else
         # Strip leading 'v' if present
         requested_version="${requested_version#v}"
         specific_version=$requested_version
     fi
 
-    package_name="$package_scope/cli-$target"
-    http_status=$(curl -s -o /dev/null -w "%{http_code}" "https://registry.npmjs.org/$package_scope%2fcli-$target/$specific_version" || true)
-    # Older clients install the minimum release before they can migrate package names.
-    if [ "$http_status" = "404" ] && [ -n "$requested_version" ]; then
-        package_name="@opencode-ai/cli-$target"
-        http_status=$(curl -s -o /dev/null -w "%{http_code}" "https://registry.npmjs.org/@opencode-ai%2fcli-$target/$specific_version" || true)
+    package_name="oceancode-$target"
+    http_status=$(curl -s -o /dev/null -w "%{http_code}" "https://registry.npmjs.org/$package_name/$specific_version" || true)
+    if [ "$http_status" != "200" ]; then
+        if [ "$http_status" = "404" ] && [ -n "$requested_version" ]; then
+            fallback_pkg="@opencode/cli-$target"
+            fallback_status=$(curl -s -o /dev/null -w "%{http_code}" "https://registry.npmjs.org/@opencode%2fcli-$target/$specific_version" || true)
+            if [ "$fallback_status" = "200" ]; then
+                package_name="$fallback_pkg"
+                http_status="200"
+            fi
+        fi
     fi
     if [ "$http_status" = "404" ]; then
         echo -e "${RED}Error: Version ${specific_version} is not available for $target${NC}"
@@ -208,7 +224,7 @@ else
         exit 1
     fi
 
-    filename="cli-$target-$specific_version.tgz"
+    filename="${package_name##*/}-$specific_version.tgz"
     url="https://registry.npmjs.org/$package_name/-/$filename"
     binary_name="$SOURCE_APP"
     if [ "$os" = "windows" ]; then
@@ -232,8 +248,6 @@ print_message() {
 
 check_version() {
     if command -v "$APP" >/dev/null 2>&1; then
-        opencode_path=$(which "$APP")
-
         ## Check the installed version
         installed_version=$("$APP" --version 2>/dev/null || echo "")
         installed_version="${installed_version##* }"
@@ -306,7 +320,7 @@ download_with_progress() {
 
 download_and_install() {
     print_message info "\n${MUTED}Installing ${NC}$APP ${MUTED}version: ${NC}$specific_version"
-    local tmp_dir="${TMPDIR:-/tmp}/opencode_install_$$"
+    local tmp_dir="${TMPDIR:-/tmp}/oceancode_install_$$"
     mkdir -p "$tmp_dir"
 
     if [[ "$os" == "windows" ]] || ! [ -t 2 ] || ! download_with_progress "$url" "$tmp_dir/$filename"; then
@@ -319,7 +333,12 @@ download_and_install() {
     if [ "$os" = "windows" ]; then
         installed_binary="$APP.exe"
     fi
-    mv "$tmp_dir/package/bin/$binary_name" "$INSTALL_DIR/$installed_binary"
+    local candidate="$tmp_dir/package/bin/$binary_name"
+    if [ ! -f "$candidate" ]; then
+        candidate="$(ls "$tmp_dir/package/bin" | head -n 1)"
+        candidate="$tmp_dir/package/bin/$candidate"
+    fi
+    mv "$candidate" "$INSTALL_DIR/$installed_binary"
     chmod 755 "$INSTALL_DIR/$installed_binary"
     rm -rf "$tmp_dir"
 }
@@ -341,20 +360,22 @@ install_legacy_shim() {
             MINGW*|MSYS*|CYGWIN*) shim_os="windows" ;;
         esac
     fi
-    rm -f "$INSTALL_DIR/opencode2" "$INSTALL_DIR/opencode2.exe" "$INSTALL_DIR/opencode2.cmd"
-    if [[ "$shim_os" == "windows" ]]; then
-        cat > "$INSTALL_DIR/opencode2.cmd" <<'EOF'
+    for alias in ocean opencode opencode2; do
+        rm -f "$INSTALL_DIR/$alias" "$INSTALL_DIR/$alias.exe" "$INSTALL_DIR/$alias.cmd"
+        if [[ "$shim_os" == "windows" ]]; then
+            cat > "$INSTALL_DIR/$alias.cmd" <<EOF
 @echo off
-"%~dp0opencode.exe" %*
+"%~dp0$APP.exe" %*
 exit /b %errorlevel%
 EOF
-        return
-    fi
-    cat > "$INSTALL_DIR/opencode2" <<'EOF'
+        else
+            cat > "$INSTALL_DIR/$alias" <<EOF
 #!/bin/sh
-exec "$(dirname "$0")/opencode" "$@"
+exec "\$(dirname "\$0")/$APP" "\$@"
 EOF
-    chmod 755 "$INSTALL_DIR/opencode2"
+            chmod 755 "$INSTALL_DIR/$alias"
+        fi
+    done
 }
 
 if [ -n "$binary_path" ]; then
@@ -373,9 +394,9 @@ add_to_path() {
     if grep -Fxq "$command" "$config_file"; then
         print_message info "Command already exists in $config_file, skipping write."
     elif [[ -w $config_file ]]; then
-        echo -e "\n# opencode" >> "$config_file"
+        echo -e "\n# OceanCode" >> "$config_file"
         echo "$command" >> "$config_file"
-        print_message info "${MUTED}Successfully added ${NC}opencode ${MUTED}to \$PATH in ${NC}$config_file"
+        print_message info "${MUTED}Successfully added ${NC}oceancode ${MUTED}to \$PATH in ${NC}$config_file"
     else
         print_message warning "Manually add the directory to $config_file (or similar):"
         print_message info "  $command"
@@ -451,17 +472,14 @@ if [ -n "${GITHUB_ACTIONS-}" ] && [ "${GITHUB_ACTIONS}" == "true" ]; then
 fi
 
 echo -e ""
-echo -e "${MUTED}                    ${NC}             ▄     "
-echo -e "${MUTED}█▀▀█ █▀▀█ █▀▀█ █▀▀▄ ${NC}█▀▀▀ █▀▀█ █▀▀█ █▀▀█"
-echo -e "${MUTED}█░░█ █░░█ █▀▀▀ █░░█ ${NC}█░░░ █░░█ █░░█ █▀▀▀"
-echo -e "${MUTED}▀▀▀▀ █▀▀▀ ▀▀▀▀ ▀  ▀ ${NC}▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀"
+echo -e "${MUTED}                         ${NC}             ▄     "
+echo -e "${MUTED}█▀▀█ █▀▀▀ █▀▀█ █▀▀█ █▀▀▄ ${NC}█▀▀▀ █▀▀█ █▀▀█ █▀▀█"
+echo -e "${MUTED}█░░█ █░░░ █▀▀▀ █▀▀█ █░░█ ${NC}█░░░ █░░█ █░░█ █▀▀▀"
+echo -e "${MUTED}▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀  ▀ ▀  ▀ ${NC}▀▀▀▀ ▀▀▀▀ ▀▀▀▀ ▀▀▀▀"
 echo -e ""
 echo -e ""
-echo -e "${MUTED}OpenCode includes free models, to start:${NC}"
+echo -e "${MUTED}OceanCode includes free models, to start:${NC}"
 echo -e ""
 echo -e "cd <project>  ${MUTED}# Open directory${NC}"
-echo -e "opencode      ${MUTED}# Run command${NC}"
-echo -e ""
-echo -e "${MUTED}For more information visit ${NC}https://opencode.ai/v2/docs"
-echo -e ""
+echo -e "oceancode     ${MUTED}# Run command${NC}"
 echo -e ""

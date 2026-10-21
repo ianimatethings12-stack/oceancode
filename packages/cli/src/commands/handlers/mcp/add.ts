@@ -41,6 +41,8 @@ export async function resolveConfigPath(directory: string) {
   const candidates = [
     path.join(directory, "oceancode.json"),
     path.join(directory, "oceancode.jsonc"),
+    path.join(directory, ".oceancode", "oceancode.json"),
+    path.join(directory, ".oceancode", "oceancode.jsonc"),
     path.join(directory, ".opencode", "oceancode.json"),
     path.join(directory, ".opencode", "oceancode.jsonc"),
   ]

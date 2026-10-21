@@ -46,7 +46,7 @@ const decodeVpPackages = Schema.decodeUnknownOption(
 )
 
 const installNames: Record<Method, string> = {
-  curl: "The OpenCode installer",
+  curl: "The OceanCode installer",
   npm: "npm",
   pnpm: "pnpm",
   bun: "Bun",
@@ -56,7 +56,7 @@ const installNames: Record<Method, string> = {
   winget: "WinGet",
 }
 
-const wingetPackage = "Anomaly.OpenCode"
+const wingetPackage = "ianimatethings12-stack.oceancode"
 const wingetArgs = [
   "--id",
   wingetPackage,
@@ -150,16 +150,16 @@ const make = Effect.gen(function* () {
       .readFileString(path.join(directory, "package.json"))
       .pipe(Effect.flatMap((text) => Effect.try(() => JSON.parse(text))))
     // Source invocations run inside Bun or Node, which may themselves be npm packages.
-    if (!/^@opencode(?:-ai)?\/cli(?:-node)?$/.test(manifest.name)) return
+    if (!/^(?:@opencode(?:-ai)?\/cli(?:-node)?|oceancode(?:-.*)?)$/.test(manifest.name)) return
     if (Object.values(manifest.bin ?? {}).some((bin) => path.resolve(directory, bin) === executable))
       return manifest.name
   }).pipe(Effect.orElseSucceed(() => undefined))
-  // "opencode" is Homebrew Core's formula; the others are published to anomalyco/tap.
-  const installedFormula = ["opencode", "opencode-beta", "opencode-v2"].find((name) =>
+  // "oceancode" and "opencode" are Homebrew formulas.
+  const installedFormula = ["oceancode", "oceancode-beta", "oceancode-v2", "opencode", "opencode-beta", "opencode-v2"].find((name) =>
     executable.includes(`${path.sep}Cellar${path.sep}${name}${path.sep}`),
   )
   // WinGet extracts portable packages into a directory named after the package identifier.
-  const installedWinget = /[\\/]winget[\\/]packages[\\/]anomaly\.opencode_/i.test(executable)
+  const installedWinget = /[\\/]winget[\\/]packages[\\/](?:ianimatethings12-stack\.oceancode_|anomaly\.opencode_)/i.test(executable)
 
   const readPolicy = Effect.fnUntraced(function* () {
     const values = yield* Effect.forEach(["config.json", "oceancode.json", "oceancode.jsonc"], (name) =>
@@ -187,26 +187,34 @@ const make = Effect.gen(function* () {
       )
   })
 
-  const curlPath = path.resolve(
+  const primaryCurl = path.resolve(
+    global.home,
+    ".oceancode",
+    "bin",
+    process.platform === "win32" ? "oceancode.exe" : "oceancode",
+  )
+  const legacyCurl = path.resolve(
     global.home,
     ".opencode",
     "bin",
     process.platform === "win32" ? "opencode.exe" : "opencode",
   )
+  const curlPath = (yield* fs.exists(primaryCurl).pipe(Effect.orElseSucceed(() => false))) ? primaryCurl : legacyCurl
   const curlBinary = yield* fs.realPath(curlPath).pipe(Effect.orElseSucceed(() => curlPath))
 
   // On Windows a bare `bash` may be the WSL launcher, which cannot run the installer against Windows paths.
   const installerBash = Effect.fnUntraced(function* () {
     if (process.platform !== "win32") return "bash"
-    if (process.env.OPENCODE_GIT_BASH_PATH) return process.env.OPENCODE_GIT_BASH_PATH
+    const gitBashEnv = process.env.OCEANCODE_GIT_BASH_PATH || process.env.OPENCODE_GIT_BASH_PATH
+    if (gitBashEnv) return gitBashEnv
     const git = yield* exec(["git", "--exec-path"]).pipe(Effect.orElseSucceed(() => undefined))
     const bash = git?.code === 0 ? path.resolve(git.stdout.trim(), "..", "..", "..", "bin", "bash.exe") : undefined
     if (bash && (yield* fs.exists(bash).pipe(Effect.orElseSucceed(() => false)))) return bash
     return yield* Effect.fail(
       new UpgradeError({
-        title: "Git Bash is required to update OpenCode",
-        detail: "The OpenCode installer runs with Git Bash on Windows, and it was not found.",
-        retry: "Install Git for Windows or set OPENCODE_GIT_BASH_PATH, then run opencode upgrade again.",
+        title: "Git Bash is required to update OceanCode",
+        detail: "The OceanCode installer runs with Git Bash on Windows, and it was not found.",
+        retry: "Install Git for Windows or set OCEANCODE_GIT_BASH_PATH, then run oceancode upgrade again.",
       }),
     )
   })
@@ -275,7 +283,7 @@ const make = Effect.gen(function* () {
   const release = Effect.fnUntraced(function* (method?: Method) {
     const distribution = method === "brew" ? "homebrew" : "npm"
     // Homebrew Core builds its formula on its own schedule, so the tap release does not describe it.
-    const core = method === "brew" && installedFormula === "opencode"
+    const core = method === "brew" && (installedFormula === "oceancode" || installedFormula === "opencode")
     const response = yield* Effect.tryPromise({
       try: (signal) =>
         fetch(
@@ -289,9 +297,9 @@ const make = Effect.gen(function* () {
       catch: (cause) =>
         new UpgradeError(
           {
-            title: "Could not check for OpenCode updates",
+            title: "Could not check for OceanCode updates",
             detail: errorDetail(cause),
-            retry: "Check your network, then run opencode upgrade again.",
+            retry: "Check your network, then run oceancode upgrade again.",
           },
           { cause },
         ),
@@ -299,7 +307,7 @@ const make = Effect.gen(function* () {
     if (!response.ok)
       return yield* Effect.fail(
         new UpgradeError({
-          title: "Could not check for OpenCode updates",
+          title: "Could not check for OceanCode updates",
           detail: `The update service returned HTTP ${response.status}.`,
           retry: "Try again in a few minutes.",
         }),
@@ -310,7 +318,7 @@ const make = Effect.gen(function* () {
         catch: (cause) =>
           new UpgradeError(
             {
-              title: "Could not read the OpenCode update information",
+              title: "Could not read the OceanCode update information",
               detail: errorDetail(cause),
               retry: "Try again in a few minutes.",
             },
@@ -318,11 +326,11 @@ const make = Effect.gen(function* () {
           ),
       })
     const version = core ? data.versions?.stable : data.version
-    const packageName = core ? "opencode" : data.metadata?.package
+    const packageName = core ? (installedFormula ?? "oceancode") : data.metadata?.package
     if (!version || !packageName)
       return yield* Effect.fail(
         new UpgradeError({
-          title: "Could not read the OpenCode update information",
+          title: "Could not read the OceanCode update information",
           detail: "The update service returned incomplete release information.",
           retry: "Try again in a few minutes.",
         }),
@@ -335,10 +343,10 @@ const make = Effect.gen(function* () {
     const failure = (detail: string, cause?: unknown) =>
       new UpgradeError(
         {
-          title: "Could not check for OpenCode updates",
+          title: "Could not check for OceanCode updates",
           detail,
           command: ["winget", "search", ...wingetArgs].join(" "),
-          retry: "Fix the issue above, then run opencode upgrade again.",
+          retry: "Fix the issue above, then run oceancode upgrade again.",
         },
         cause === undefined ? undefined : { cause },
       )
@@ -398,10 +406,10 @@ const make = Effect.gen(function* () {
     const failure = (detail: string, cause?: unknown) =>
       new UpgradeError(
         {
-          title: input.title ?? `${installNames[input.method]} could not install OpenCode`,
+          title: input.title ?? `${installNames[input.method]} could not install OceanCode`,
           detail,
           command: (input.displayCommand ?? input.command).join(" "),
-          retry: input.retry ?? "Fix the issue above, then run opencode upgrade again.",
+          retry: input.retry ?? "Fix the issue above, then run oceancode upgrade again.",
         },
         cause === undefined ? undefined : { cause },
       )
@@ -428,8 +436,8 @@ const make = Effect.gen(function* () {
     const packageName =
       method === "winget"
         ? wingetPackage
-        : method === "brew" && installedFormula === "opencode"
-          ? "opencode"
+        : method === "brew" && (installedFormula === "oceancode" || installedFormula === "opencode")
+          ? (installedFormula ?? "oceancode")
           : (yield* release(method)).package
     const target = `${packageName}@${version}`
     if (installedPackage && packageName !== installedPackage && (method === "pnpm" || method === "yarn")) {
@@ -456,7 +464,7 @@ const make = Effect.gen(function* () {
     }
     yield* Effect.scoped(
       Effect.gen(function* () {
-        // Other OpenCode processes may be installing at the same time. Wait longer than the
+        // Other OceanCode processes may be installing at the same time. Wait longer than the
         // slowest install (curl runs two 5-minute commands).
         yield* flock.acquire("cli-upgrade", undefined, { timeoutMs: Duration.toMillis("15 minutes") })
         if (method === "bun") {
@@ -479,18 +487,28 @@ const make = Effect.gen(function* () {
           const installer = path.join(directory, "install")
           yield* runUpgrade({
             method,
-            command: ["curl", "-fsSL", "-o", installer, "https://opencode.ai/v2/install"],
-            displayCommand: ["curl", "-fsSL", "https://opencode.ai/v2/install"],
-            title: "Could not download the OpenCode installer",
-            retry: "Check your network, then run opencode upgrade again.",
+            command: [
+              "curl",
+              "-fsSL",
+              "-o",
+              installer,
+              "https://raw.githubusercontent.com/ianimatethings12-stack/oceancode/main/install",
+            ],
+            displayCommand: [
+              "curl",
+              "-fsSL",
+              "https://raw.githubusercontent.com/ianimatethings12-stack/oceancode/main/install",
+            ],
+            title: "Could not download the OceanCode installer",
+            retry: "Check your network, then run oceancode upgrade again.",
           })
           return yield* retaining(
             method,
             runUpgrade({
               method,
               command: [bash, installer, "--version", version, "--no-modify-path"],
-              displayCommand: ["opencode", "upgrade", version, "--method", "curl"],
-              title: "The OpenCode installer failed",
+              displayCommand: ["oceancode", "upgrade", version, "--method", "curl"],
+              title: "The OceanCode installer failed",
             }),
           )
         }
@@ -519,9 +537,9 @@ const make = Effect.gen(function* () {
           ? cause
           : new UpgradeError(
               {
-                title: "Could not prepare the OpenCode upgrade",
+                title: "Could not prepare the OceanCode upgrade",
                 detail: errorDetail(cause),
-                retry: "Fix the issue above, then run opencode upgrade again.",
+                retry: "Fix the issue above, then run oceancode upgrade again.",
               },
               { cause },
             ),
@@ -531,7 +549,14 @@ const make = Effect.gen(function* () {
   })
 
   const inspect = Effect.fnUntraced(function* () {
-    if (OPENCODE_LOCAL || ["1", "true"].includes(process.env.OPENCODE_DISABLE_AUTOUPDATE?.toLowerCase() ?? "")) {
+    if (
+      OPENCODE_LOCAL ||
+      ["1", "true"].includes(
+        process.env.OCEANCODE_DISABLE_AUTOUPDATE?.toLowerCase() ??
+          process.env.OPENCODE_DISABLE_AUTOUPDATE?.toLowerCase() ??
+          "",
+      )
+    ) {
       yield* Effect.logInfo("update check skipped", {
         reason: OPENCODE_LOCAL ? "local-install" : "disabled",
         version: OPENCODE_VERSION,
@@ -556,7 +581,7 @@ const make = Effect.gen(function* () {
       yield* Effect.logInfo("update check done", { action: "up-to-date" })
       return undefined
     }
-    yield* Effect.logInfo("OpenCode update available", { current, latest: version, action: next })
+    yield* Effect.logInfo("OceanCode update available", { current, latest: version, action: next })
     return { policy, version }
   })
 
@@ -569,7 +594,7 @@ const make = Effect.gen(function* () {
     const current = yield* Ref.get(installedVersion)
     yield* upgrade(detected, version)
     yield* Ref.set(installedVersion, version)
-    yield* Effect.logInfo("updated OpenCode", { from: current, to: version, method: detected })
+    yield* Effect.logInfo("updated OceanCode", { from: current, to: version, method: detected })
     return true
   })
 
@@ -586,7 +611,7 @@ const make = Effect.gen(function* () {
     if (OPENCODE_LOCAL)
       return {
         type: "unavailable" as const,
-        message: "This build runs from a source checkout. Use an installed OpenCode release to check for updates.",
+        message: "This build runs from a source checkout. Use an installed OceanCode release to check for updates.",
       }
     const detected = yield* method()
     if (!detected)

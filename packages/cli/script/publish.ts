@@ -66,6 +66,7 @@ async function publishDistribution(input: {
   console.log(input.name, "binaries", binaries)
   const version = Script.version
 
+  await rm(path.join(input.root, input.name, "bin"), { recursive: true, force: true })
   await $`mkdir -p ${input.root}/${input.name}/bin`
   await $`cp ./script/postinstall.mjs ${input.root}/${input.name}/postinstall.mjs`
   await $`cp ../../README.md ${input.root}/${input.name}/README.md`
