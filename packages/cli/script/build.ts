@@ -205,11 +205,6 @@ export default { path: file, version: ${JSON.stringify(opencodePty.version)}, sh
     process.exit(1)
   }
   verifySimulationGraph(simulationInputs)
-  const ext = item.os === "win32" ? ".exe" : ""
-  await Bun.write(
-    path.join(outdir, name, "bin", `ocean${ext}`),
-    await Bun.file(path.join(outdir, name, "bin", `${binary}${ext}`)).bytes(),
-  )
   await NativeArch.verify(path.join(outdir, name, "bin", item.os === "win32" ? `${binary}.exe` : binary), item.arch)
 
   await Bun.write(
