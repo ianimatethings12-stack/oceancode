@@ -8,7 +8,10 @@ export default Extension.define({
   provides: { pairing: Pairing },
   stores: {
     // Whether main keeps the display awake; stored before in the desktop's own settings namespace.
-    keepScreenActive: Store.main(Schema.Boolean, false, { state: ["opencode.settings", "keepScreenActive"] }),
+    keepScreenActive: Store.main(Schema.Boolean, false, [
+      { state: ["oceancode.settings", "keepScreenActive"] },
+      { state: ["opencode.settings", "keepScreenActive"] },
+    ]),
   },
   i18n: { en },
 })

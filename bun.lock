@@ -113,8 +113,10 @@
     },
     "packages/cli": {
       "name": "@opencode/cli",
-      "version": "2.1.5",
+      "version": "1.2.6",
       "bin": {
+        "oceancode": "./bin/oceancode.cjs",
+        "ocean": "./bin/ocean.cjs",
         "opencode": "./bin/opencode.cjs",
         "opencode2": "./bin/opencode2.cjs",
       },
@@ -125,6 +127,7 @@
         "@effect/platform-node": "catalog:",
         "@opencode-ai/pty": "0.3.1",
         "@opencode/client": "workspace:*",
+        "@opencode/core": "workspace:*",
         "@opencode/plugin": "workspace:*",
         "@opencode/schema": "workspace:*",
         "@opencode/server": "workspace:*",
@@ -181,7 +184,7 @@
     },
     "packages/client": {
       "name": "@opencode/client",
-      "version": "2.1.5",
+      "version": "1.2.6",
       "dependencies": {
         "@opencode/protocol": "workspace:*",
         "@opencode/schema": "workspace:*",
@@ -259,7 +262,7 @@
     },
     "packages/core": {
       "name": "@opencode/core",
-      "version": "2.1.5",
+      "version": "1.2.6",
       "dependencies": {
         "@ai-sdk/cohere": "3.0.27",
         "@ai-sdk/perplexity": "3.0.26",
@@ -497,7 +500,7 @@
     },
     "packages/plugin": {
       "name": "@opencode/plugin",
-      "version": "2.1.5",
+      "version": "1.2.6",
       "dependencies": {
         "@ai-sdk/provider": "3.0.8",
         "@opencode/ai": "workspace:*",
@@ -594,7 +597,7 @@
     },
     "packages/schema": {
       "name": "@opencode/schema",
-      "version": "2.1.5",
+      "version": "1.2.6",
       "dependencies": {
         "@standard-schema/spec": "catalog:",
         "effect": "catalog:",
@@ -618,7 +621,7 @@
     },
     "packages/sdk": {
       "name": "@opencode/sdk",
-      "version": "2.1.5",
+      "version": "1.2.6",
       "dependencies": {
         "@opencode/client": "workspace:*",
         "@opencode/core": "workspace:*",
@@ -639,7 +642,7 @@
     },
     "packages/server": {
       "name": "@opencode/server",
-      "version": "2.1.5",
+      "version": "1.2.6",
       "dependencies": {
         "@effect/platform-node": "catalog:",
         "@effect/platform-node-shared": "catalog:",
@@ -822,7 +825,7 @@
     },
     "packages/tui": {
       "name": "@opencode/tui",
-      "version": "2.1.5",
+      "version": "1.2.6",
       "dependencies": {
         "@opencode/client": "workspace:*",
         "@opencode/core": "workspace:*",
@@ -891,7 +894,7 @@
     },
     "packages/util": {
       "name": "@opencode/util",
-      "version": "2.1.5",
+      "version": "1.2.6",
       "dependencies": {
         "@effect/opentelemetry": "catalog:",
         "@effect/platform-node": "catalog:",
