@@ -61,8 +61,9 @@ export function resolveDesignPreset(promptOrDomain: string): ResolutionResult {
     }
   }
 
-  // 1. Direct brand mention check
-  for (const archetype of ARCHETYPES) {
+  // 1. Direct brand mention check (test longer names first e.g. "BMW M" before "BMW")
+  const candidatesBySpecificity = [...ARCHETYPES].sort((a, b) => b.name.length - a.name.length)
+  for (const archetype of candidatesBySpecificity) {
     const idName = archetype.id.replace(/\.(app|ai)$/, "")
     const regex = new RegExp(`\\b(${archetype.id}|${archetype.name}|${idName})\\b`, "i")
     if (regex.test(query)) {

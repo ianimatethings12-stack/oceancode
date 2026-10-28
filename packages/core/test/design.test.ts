@@ -119,6 +119,9 @@ describe("Design System Engine - Domain Resolver", () => {
 
     const result2 = resolveDesignPreset("Make it look like Framer motion")
     expect(result2.primary.id).toBe("framer")
+
+    const result3 = resolveDesignPreset("Design a BMW M high-performance cluster")
+    expect(result3.primary.id).toBe("bmw-m")
   })
 
   it("provides sensible defaults for empty prompts", () => {

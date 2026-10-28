@@ -109,8 +109,7 @@ async function ensureProjectDesign(targetDir: string, promptText: string, auto?:
   })
 
   if (isCancel(picked)) {
-    await Effect.runPromise(writeProjectDesign(targetDir, resolution.primary))
-    outro(`Applied default ${resolution.primary.name} to DESIGN.md`)
+    outro("Design system setup cancelled.")
     return
   }
 
@@ -120,7 +119,11 @@ async function ensureProjectDesign(targetDir: string, promptText: string, auto?:
       message: "Enter brand archetype name:",
       placeholder: "e.g. stripe, linear.app, tesla, vercel",
     })
-    if (!isCancel(customInput) && customInput.trim()) {
+    if (isCancel(customInput)) {
+      outro("Design system setup cancelled.")
+      return
+    }
+    if (customInput.trim()) {
       selectedId = customInput.trim()
     } else {
       selectedId = resolution.primary.id
@@ -139,7 +142,11 @@ async function run(input: RunCommandInput, options: ExecutionOptions) {
   const directory = options.useServerDirectory ? undefined : (options.directory ?? local)
   const message = mergeInput(formatMessage(input.message), process.stdin.isTTY ? undefined : await readStdin())
   if (!message?.trim()) fail("You must provide a message")
-  await ensureProjectDesign(directory ?? root, message, input.auto)
+  const targetDirectory = directory ?? root
+  const hasDesignDoc = await Bun.file(path.join(targetDirectory, "DESIGN.md")).exists()
+  if (!hasDesignDoc) {
+    await ensureProjectDesign(targetDirectory, message, input.auto)
+  }
   const files = await Promise.all(input.file.map((file) => prepareFile(file, root, options)))
   const prepared = { directory, message, files }
   return execute(input, prepared, input.server.endpoint, options)
