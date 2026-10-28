@@ -561,6 +561,42 @@ const Root = Spec.make(typeof OPENCODE_CLI_NAME === "string" ? OPENCODE_CLI_NAME
         stdio: Flag.Boolean("stdio").pipe(Flag.withDefault(false)),
       },
     }),
+    Spec.make("design", {
+      description: "Autonomous Design System Engine (85+ archetypes from awesome-design-md)",
+      commands: [
+        Spec.make("select", {
+          description: "Interactively select or automatically apply a design archetype to DESIGN.md",
+          params: {
+            ...ServerParams,
+            ...PermissionParams,
+            prompt: Argument.String("prompt").pipe(
+              Argument.withDescription("Prompt or concept to match design preset"),
+              Argument.optional,
+            ),
+            brand: Flag.String("brand").pipe(
+              Flag.withAlias("b"),
+              Flag.withDescription("Archetype brand name (e.g. stripe, linear.app, tesla)"),
+              Flag.optional,
+            ),
+            force: Flag.Boolean("force").pipe(
+              Flag.withAlias("f"),
+              Flag.withDescription("Overwrite existing DESIGN.md"),
+              Flag.withDefault(false),
+            ),
+          },
+        }),
+        Spec.make("list", {
+          description: "List all 85+ design archetypes by category",
+          params: {
+            category: Flag.String("category").pipe(
+              Flag.withAlias("c"),
+              Flag.withDescription("Filter by category"),
+              Flag.optional,
+            ),
+          },
+        }),
+      ],
+    }),
   ],
 })
 

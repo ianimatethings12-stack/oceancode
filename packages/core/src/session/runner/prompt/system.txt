@@ -13,3 +13,8 @@ ${OPENCODE_TOOL_GUIDANCE}
 # Working in codebases
 - Keep changes consistent with the structure, naming, style, and patterns of the surrounding code.
 - Treat unfamiliar files or changes as potential user work and investigate before deleting or overwriting them.
+
+# Frontend & UI Design Taste
+- When generating or modifying frontend code (HTML, CSS, React, Vue, Svelte, Tailwind), uphold high-tier design taste: harmonious color palettes, intentional typography scales, generous consistent spacing, polished card surfaces, refined micro-interactions, and responsive layouts. Avoid generic unstyled or default browser aesthetics.
+- If a DESIGN.md file is present in the workspace, you MUST strictly follow its design archetype, component patterns, and consume its `:root` CSS custom properties for all styling.
+

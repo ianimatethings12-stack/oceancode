@@ -11,6 +11,8 @@ import { toolInlineInfo } from "@opencode/tui/mini/tool"
 import { runNonInteractivePrompt } from "./noninteractive"
 import { UI } from "./ui"
 import { Env } from "../env"
+import { isFrontendPrompt, resolveDesignPreset, writeProjectDesign, getArchetype } from "@opencode/core/design"
+import { Effect } from "effect"
 import { errorMessage } from "../util/error"
 
 export type RunCommandInput = {
@@ -69,6 +71,67 @@ export function runNonInteractiveWithOptions(input: RunCommandInput, options: Ex
   return run(input, options).catch((error) => reportRunError(input, errorMessage(error)))
 }
 
+async function ensureProjectDesign(targetDir: string, promptText: string, auto?: boolean) {
+  if (!isFrontendPrompt(promptText)) return
+  const designFile = Bun.file(path.join(targetDir, "DESIGN.md"))
+  if (await designFile.exists()) return
+
+  const isInteractive = Boolean(process.stdin.isTTY && !auto)
+  const resolution = resolveDesignPreset(promptText)
+
+  if (!isInteractive) {
+    await Effect.runPromise(writeProjectDesign(targetDir, resolution.primary))
+    console.log(`[design] Frontend prompt detected. Generated DESIGN.md with primary archetype: ${resolution.primary.name} (${resolution.primary.vibe})`)
+    return
+  }
+
+  const { intro, select, text, isCancel, outro, log } = await import("@clack/prompts")
+  intro("Autonomous Design System Engine")
+  log.info(`Detected frontend intent for: "${promptText.slice(0, 60)}..."`)
+
+  const choices = [
+    ...resolution.recommendations.map((rec, index) => ({
+      value: rec.id,
+      label: `${index + 1}. ${rec.name} [${rec.palette.primary}]`,
+      hint: rec.vibe,
+    })),
+    {
+      value: "__custom__",
+      label: "Custom: Choose any brand archetype from the 85+ catalog",
+      hint: "e.g. spacex, wise, notion, figma, vercel, apple...",
+    },
+  ]
+
+  const picked = await select({
+    message: "No DESIGN.md found. Choose a design archetype for UI code generation:",
+    options: choices,
+    initialValue: resolution.primary.id,
+  })
+
+  if (isCancel(picked)) {
+    await Effect.runPromise(writeProjectDesign(targetDir, resolution.primary))
+    outro(`Applied default ${resolution.primary.name} to DESIGN.md`)
+    return
+  }
+
+  let selectedId = picked as string
+  if (selectedId === "__custom__") {
+    const customInput = await text({
+      message: "Enter brand archetype name:",
+      placeholder: "e.g. stripe, linear.app, tesla, vercel",
+    })
+    if (!isCancel(customInput) && customInput.trim()) {
+      selectedId = customInput.trim()
+    } else {
+      selectedId = resolution.primary.id
+    }
+  }
+
+  const archetype = getArchetype(selectedId)
+  await Effect.runPromise(writeProjectDesign(targetDir, archetype ?? selectedId))
+  outro(`✓ Written DESIGN.md using ${archetype?.name ?? selectedId}`)
+}
+
 async function run(input: RunCommandInput, options: ExecutionOptions) {
   if (input.fork && !input.continue && !input.session) fail("--fork requires --continue or --session")
   const root = options.root ?? process.env.PWD ?? process.cwd()
@@ -76,6 +139,7 @@ async function run(input: RunCommandInput, options: ExecutionOptions) {
   const directory = options.useServerDirectory ? undefined : (options.directory ?? local)
   const message = mergeInput(formatMessage(input.message), process.stdin.isTTY ? undefined : await readStdin())
   if (!message?.trim()) fail("You must provide a message")
+  await ensureProjectDesign(directory ?? root, message, input.auto)
   const files = await Promise.all(input.file.map((file) => prepareFile(file, root, options)))
   const prepared = { directory, message, files }
   return execute(input, prepared, input.server.endpoint, options)
